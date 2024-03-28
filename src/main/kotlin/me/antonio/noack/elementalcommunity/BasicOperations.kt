@@ -1,13 +1,13 @@
 package me.antonio.noack.elementalcommunity
 
-import java.util.*
+import R
 import android.app.Dialog
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import me.antonio.noack.elementalcommunity.api.WebServices
-import java.lang.IllegalArgumentException
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 
@@ -16,27 +16,39 @@ object BasicOperations {
     val todo = AtomicInteger(0)
     val done = AtomicInteger(0)
 
-    fun onRecipeRequest(first: Element, second: Element, all: AllManager, measuredWidth: Int, measuredHeight: Int, unlockElement: (Element) -> Unit, add: (Element) -> Unit){
+    fun onRecipeRequest(
+        first: Element,
+        second: Element,
+        all: AllManager,
+        measuredWidth: Int,
+        measuredHeight: Int,
+        unlockElement: (Element) -> Unit,
+        add: (Element) -> Unit
+    ) {
         todo.incrementAndGet()
-        thread(true){
+        thread(true) {
             WebServices.askRecipe(first, second, all, { result ->
                 done.incrementAndGet()
                 when {
                     result != null -> unlockElement(result)
-                    AllManager.askFrequency.isTrue() -> {
+                    AllManager.offlineMode || AllManager.askFrequency.isTrue() -> {
                         // staticRunOnUIThread { AllManager.askingSound.play() }
-                        askForRecipe(first, second, all, measuredWidth, measuredHeight, unlockElement){
+                        askForCandidates(
+                            first, second, all,
+                            measuredWidth,
+                            measuredHeight,
+                            unlockElement
+                        ) {
                             WebServices.askRecipe(first, second, all, { result2 ->
-                                if(result2 != null){// remove in the future, when the least amount of support is 2 or sth like that
-                                    if(null != Unit){
-                                        AllManager.unlockedIds.add(result2.uuid)
-                                        AllManager.saveElement2(result2)
-                                        add(result2)
-                                    }
+                                if (result2 != null) {// remove in the future, when the least amount of support is 2 or sth like that
+                                    AllManager.unlockedIds.put(result2.uuid)
+                                    AllManager.saveElement2(result2)
+                                    add(result2)
                                 }
                             }, {})
                         }
                     }
+
                     else -> AllManager.toast(R.string.no_result_found, false)
                 }
             }, {
@@ -46,57 +58,86 @@ object BasicOperations {
         }
     }
 
-    fun askForRecipe(a: Element, b: Element, all: AllManager, measuredWidth: Int, measuredHeight: Int, unlockElement: (Element) -> Unit, onSuccess: () -> Unit){
+    fun askForCandidates(
+        a: Element,
+        b: Element,
+        all: AllManager,
+        measuredWidth: Int,
+        measuredHeight: Int,
+        unlockElement: (Element) -> Unit,
+        onSuccess: () -> Unit
+    ) {
         // ask for recipe to add :)
-        // todo show that we are loading
         todo.incrementAndGet()
         WebServices.getCandidates(a, b, { candidates ->
             done.incrementAndGet()
-            AllManager.staticRunOnUIThread {
-                val dialog: Dialog = AlertDialog.Builder(all)
-                    .setView(R.layout.add_recipe)
-                    .show()
-                dialog.findViewById<TextView>(R.id.cancel)!!.setOnClickListener {
-                    try {
-                        dialog.dismiss()
-                    } catch (e: Throwable) {
-                    }
+
+            val dialog: Dialog = AlertDialog.Builder(all)
+                .setView(R.layout.add_recipe)
+                .show()
+            dialog.findViewById<TextView>(R.id.cancel)!!.setOnClickListener {
+                try {
+                    dialog.dismiss()
+                } catch (_: Throwable) {
                 }
-                setSubmitAction(all, dialog.findViewById(R.id.submit)!!, dialog, true, { a }, { b }, {
+            }
+            setSubmitAction(
+                all, dialog.findViewById(R.id.submit)!!, dialog,
+                true,
+                { a }, { b }, {
                     unlockElement(it)
                     onSuccess()
                 })
-                if (candidates.isEmpty()) {
-                    dialog.findViewById<View>(R.id.title2)!!.visibility = View.GONE
-                } else {
-                    val suggestionsView = dialog.findViewById<LinearLayout>(R.id.suggestions)!!
-                    val theWidth = min(measuredWidth, measuredHeight) * 2f / 5
-                    for (candidate in candidates) {
-                        val view = CandidateView(all, null)
-                        view.candidate = candidate
-                        view.layoutParams = View.LayoutParams(theWidth.toInt(), View.LayoutParams.WRAP_CONTENT)
-                        view.theWidth = theWidth
-                        view.invalidate()
-                        view.onLiked = {
-                            try {
-                                dialog.dismiss()
-                            } catch (e: IllegalArgumentException) {
-                            }
+            if (candidates.isEmpty()) {
+                dialog.findViewById<View>(R.id.title2)!!.visibility = View.GONE
+            } else {
+                val suggestionsView = dialog.findViewById<LinearLayout>(R.id.suggestions)!!
+                val theWidth = min(measuredWidth, measuredHeight) * 2f / 5
+                for (candidate in candidates) {
+                    val view = CandidateView(all, null)
+                    view.candidate = candidate
+                    view.layoutParams = View.LayoutParams(
+                        theWidth.toInt(),
+                        View.LayoutParams.WRAP_CONTENT
+                    )
+                    view.theWidth = theWidth
+                    view.invalidate()
+                    view.onLiked = {
+                        try {
+                            dialog.dismiss()
+                        } catch (_: IllegalArgumentException) {
+                        }
+                        if (AllManager.offlineMode) {
+                            OfflineSuggestions.addOfflineRecipe(
+                                all, a, b, candidate.name, candidate.group
+                            )
+                            OfflineSuggestions.storeOfflineElements()
+                            AllManager.toast("Added offline recipe", false)
+                        } else {
                             WebServices.likeRecipe(all, candidate.uuid, {
                                 AllManager.toast(R.string.sent, false)
                             })
                         }
-                        view.onDisliked = {
+                    }
+                    view.onDisliked = {
+                        if (AllManager.offlineMode) {
+                            val result = OfflineSuggestions.getOfflineRecipe(a, b)
+                            if (result?.name == candidate.name) {
+                                AllManager.toast("Deleted offline recipe", false)
+                            } else {
+                                AllManager.toast("Cannot dislike in offline mode", false)
+                            }
+                        } else {
                             WebServices.dislikeRecipe(all, candidate.uuid, {
                                 AllManager.toast(R.string.sent, false)
                             })
                         }
-                        view.layoutParams = View.LayoutParams(
-                            View.LayoutParams.MATCH_PARENT,
-                            View.LayoutParams.WRAP_CONTENT
-                        )
-                        suggestionsView.addView(view)
                     }
+                    view.layoutParams = View.LayoutParams(
+                        View.LayoutParams.MATCH_PARENT,
+                        View.LayoutParams.WRAP_CONTENT
+                    )
+                    suggestionsView.addView(view)
                 }
             }
         }, {
@@ -105,7 +146,15 @@ object BasicOperations {
         })
     }
 
-    fun setSubmitAction(all: AllManager, submit: TextView, dialog: Dialog, allowingDismiss: Boolean, getComponentA: () -> Element, getComponentB: () -> Element, unlockElement: (Element) -> Unit){
+    fun setSubmitAction(
+        all: AllManager,
+        submit: TextView,
+        dialog: Dialog,
+        allowingDismiss: Boolean,
+        getComponentA: () -> Element,
+        getComponentB: () -> Element,
+        unlockElement: (Element) -> Unit
+    ) {
         submit.setOnClickListener {
             val name = dialog.findViewById<TextView>(R.id.name)!!.text.toString()
             val group = dialog.findViewById<GroupSelectorView>(R.id.colors)!!.selected
@@ -124,39 +173,41 @@ object BasicOperations {
                 }
             }
             todo.incrementAndGet()
-            thread {
-                WebServices.suggestRecipe(all, getComponentA(), getComponentB(), name, group, {
+            WebServices.suggestRecipe(
+                all, getComponentA(), getComponentB(), name, group,
+                { line ->
                     done.incrementAndGet()
-                    val lines = it.split('\n')
-                    val str = lines[0]
-                    val index1 = str.indexOf(':')
-                    val index2 = str.indexOf(':', index1 + 1)
                     AllManager.toast(R.string.sent, false)
-                    if(allowingDismiss){
-                        AllManager.staticRunOnUIThread {
-                            try {
-                                dialog.dismiss()
-                            } catch (e: IllegalArgumentException) {
-                            }
+                    if (allowingDismiss) {
+                        try {
+                            dialog.dismiss()
+                        } catch (_: IllegalArgumentException) {
                         }
                     }
+                    var lineBreakIndex = line.indexOf('\n')
+                    if (lineBreakIndex < 0) lineBreakIndex = line.length
+                    val str = line.substring(0, lineBreakIndex)
+                    val index1 = str.indexOf(':')
+                    val index2 = str.indexOf(':', index1 + 1)
                     if (index1 > 0 && index2 > 0) {
-                        val rUUID = str.substring(0, index1).toIntOrNull() ?: return@suggestRecipe
-                        val rGroup = str.substring(index1 + 1, index2).toIntOrNull() ?: return@suggestRecipe
-                        val rName = str.substring(index2 + 1)
-                        // val secondaryData = lines.getOrNull(1)?.split(':')
-                        // removed, because it's rather expensive to compute and not that important
-                        // maybe we should save that information on per-instance basis in the database...
-                        val rCraftingCount = -1
-                        val element = Element.get(rName, rUUID, rGroup, rCraftingCount)
-                        unlockElement(element)
-                    }
-                }, {
-                    done.incrementAndGet()
-                })
-            }
-        }
+                        try {
+                            val rUUID = str.substring(0, index1).toInt()
+                            val rGroup = str.substring(index1 + 1, index2).toInt()
+                            val rName = str.substring(index2 + 1)
+                            // val secondaryData = lines.getOrNull(1)?.split(':')
+                            // removed, because it's rather expensive to compute and not that important
+                            // maybe we should save that information on per-instance basis in the database...
+                            val rCraftingCount = -1
+                            val element =
+                                Element.get(rName, rUUID, rGroup, rCraftingCount, true)
+                            unlockElement(element)
+                        } catch (_: NumberFormatException) {
 
+                        }
+                    }
+                },
+                { done.incrementAndGet() })
+        }
     }
 
 }

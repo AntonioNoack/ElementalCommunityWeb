@@ -27,20 +27,20 @@ class HorizontalScrollView(ctx: Context, attributeSet: AttributeSet?): ViewGroup
 
     init {
         val gestureDetector = GestureDetector(object: GestureDetector.OnGestureListener {
-            override fun onDown(event: MotionEvent?): Boolean = false
-            override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
-            override fun onLongPress(e: MotionEvent?) {}
-            override fun onScroll(event: MotionEvent?, e2: MotionEvent?, dx: Float, dy: Float): Boolean {
+            override fun onDown(event: MotionEvent): Boolean = false
+            override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
+            override fun onLongPress(e: MotionEvent) {}
+            override fun onScroll(event: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
                 checkScroll(dx, true)
                 return true
             }
-            override fun onShowPress(e: MotionEvent?) {}
-            override fun onSingleTapUp(event: MotionEvent?): Boolean = false
+            override fun onShowPress(e: MotionEvent) {}
+            override fun onSingleTapUp(event: MotionEvent): Boolean = false
         })
         setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         checkScroll(0f, false)
         super.onDraw(canvas)
     }

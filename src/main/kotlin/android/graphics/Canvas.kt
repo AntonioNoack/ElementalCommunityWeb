@@ -21,22 +21,6 @@ class Canvas(val ctx: CanvasRenderingContext2D){
         ctx.fillRect(left.toDouble(), top.toDouble(), (right-left).toDouble(), (bottom-top).toDouble())
     }
 
-    fun lineRect(left: Int, top: Int, right: Int, bottom: Int, color: Int){
-        ctx.strokeStyle = rgbaString(color)
-        ctx.lineWidth = 1.0
-        ctx.beginPath()
-        ctx.rect(left.toDouble(), top.toDouble(), (right-left).toDouble(), (bottom-top).toDouble())
-        ctx.stroke()
-    }
-
-    fun lineRect(left: Double, top: Double, right: Double, bottom: Double, color: Int){
-        ctx.strokeStyle = rgbaString(color)
-        ctx.lineWidth = 1.0
-        ctx.beginPath()
-        ctx.rect(left, top, (right-left), (bottom-top))
-        ctx.stroke()
-    }
-
     fun lineRect(left: Float, top: Float, right: Float, bottom: Float, color: Int){
         ctx.strokeStyle = rgbaString(color)
         ctx.lineWidth = 1.0

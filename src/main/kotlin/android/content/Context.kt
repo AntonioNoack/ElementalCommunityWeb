@@ -5,19 +5,20 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 
-open class Context: FrameLayout(null, null){
+open class Context : FrameLayout(null, null) {
 
-    val resources = Resources()
-    val layoutInflater = LayoutInflater.instance
+    val resources get() = Resources
+    val layoutInflater get() = LayoutInflater
+    val theme = 0
 
-    fun getPreferences(mode: Int) = LocalStoragePreferences()
+    fun getPreferences(mode: Int) = LocalStoragePreferences
 
-    open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
+    open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
     }
 
     fun getSystemService(key: String): Any? {
-        when(key){
+        when (key) {
             VIBRATOR_SERVICE -> return Vibrator()
         }
         println("Warning: Service $key not found")

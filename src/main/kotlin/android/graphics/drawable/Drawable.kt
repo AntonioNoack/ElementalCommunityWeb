@@ -8,5 +8,5 @@ abstract class Drawable: RectF(){
     fun getIntrinsicHeight() = height().toInt()
     abstract fun getMinimumWidth(): Int
     abstract fun getMinimumHeight(): Int
-    abstract fun draw(canvas: Canvas?)
+    abstract fun draw(canvas: Canvas)
 }

@@ -17,7 +17,7 @@ import kotlin.math.sin
 
 class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSet) {
 
-    val noise = NoiseMap2D()
+    private val noise = NoiseMap2D()
     var news = ArrayList<News>(10)
 
     private val relativeWidth = 4f
@@ -32,9 +32,8 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
     private val bgPaint = Paint()
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if(canvas == null) return
 
         GroupsEtc.tick()
 
@@ -50,6 +49,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
         val time = sin(java.util.System.nanoTime() * 1e-10).toFloat()
 
         val hasNews = news.isNotEmpty()
+        val offline = AllManager.offlineMode
 
         for(i in 0 until max(10, news.size)){
 
@@ -60,11 +60,14 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
             canvas.rotate((noise.getNoise(time, i)-.5f) * 50, width/2, widthPerNode/2)
 
             drawElement(canvas, -1, 0f, 0f, 0f, widthPerNode, true,
-                candidate?.a?.name ?: if(hasNews) "God" else "App", candidate?.a?.group ?: (noise.getNoise(time, 78+i*100).times(size).toInt()), -1, bgPaint, textPaint)
+                candidate?.a?.name ?: if(hasNews) "God" else if(offline) "Offline Mode" else "App",
+                candidate?.a?.group ?: (noise.getNoise(time, 78+i*100).times(size).toInt()), -1, bgPaint, textPaint)
             drawElement(canvas, -1, widthPerNode*(relativeWidth-1f)/2, 0f, 0f, widthPerNode, true,
-                candidate?.b?.name ?: if(hasNews) "Magic" else "No WLAN", candidate?.b?.group ?: (noise.getNoise(time, 156+i*1020).times(size).toInt()), -1, bgPaint, textPaint)
+                candidate?.b?.name ?: if(hasNews) "Magic" else if(offline) "No WLAN" else "No WLAN",
+                candidate?.b?.group ?: (noise.getNoise(time, 156+i*1020).times(size).toInt()), -1, bgPaint, textPaint)
             drawElement(canvas, -1, widthPerNode*(relativeWidth-1f), 0f, 0f, widthPerNode, true,
-                candidate?.result ?: if(hasNews) "Elements" else "No Game", candidate?.resultGroup ?: (noise.getNoise(time, 23+i*950).times(size).toInt()), -1, bgPaint, textPaint)
+                candidate?.result ?: if(hasNews) "Elements" else if(offline) "Game" else "No Game",
+                candidate?.resultGroup ?: (noise.getNoise(time, 23+i*950).times(size).toInt()), -1, bgPaint, textPaint)
 
             textPaint.textAlign = Paint.Align.CENTER
             textPaint.textSize = widthPerNode*.5f
@@ -104,14 +107,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
 
     }
 
-    fun darken(rgb: Int): Int {
-        val r = (rgb shr 16) and 255
-        val g = (rgb shr 8) and 255
-        val b = rgb and 255
-        return 0xff000000.toInt() or ((r / 2) shl 16) or ((g / 2) shl 8) or (b/2)
-    }
-
-    fun timeString(sec: Int): String {
+    private fun timeString(sec: Int): String {
         return if(sec < 30){
             sec.toString()+"s"
         } else if(sec < 180){

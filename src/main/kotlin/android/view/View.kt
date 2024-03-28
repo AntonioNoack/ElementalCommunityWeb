@@ -41,6 +41,7 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
 
     val uuid = Companion.uuid++
     var hasFocus = false
+    var alpha = 1f
 
     open fun onVisibilityChanged(){}
 
@@ -426,12 +427,12 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
         return this
     }
 
-    fun withAttribute(key: String, value: String): View {
+    fun attr(key: String, value: String): View {
         attributeSet.values[key] = value
         return this
     }
 
-    fun withAttribute(key: String, value: Int): View {
+    fun attr(key: String, value: Int): View {
         attributeSet.values[key] = value.toString()
         return this
     }
@@ -523,8 +524,7 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
         invalidate()
     }
 
-    open fun onDraw(canvas: Canvas?){
-        canvas ?: return
+    open fun onDraw(canvas: Canvas){
         drawBackground(canvas)
     }
 
@@ -541,7 +541,7 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
         // canvas.setBounds(0, 0, mw - (mPaddingLeft + mPaddingRight), mh - (mPaddingTop + mPaddingBottom))
     }
 
-    open fun draw(canvas: Canvas?){
+    open fun draw(canvas: Canvas){
         onDraw(canvas)
     }
 
@@ -615,8 +615,7 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
     fun resolveSizeAndState(size: Int, measureSpec: Int, childMeasuredState: Int): Int {
         val specMode = MeasureSpec.getMode(measureSpec)
         val specSize = MeasureSpec.getSize(measureSpec)
-        val result: Int
-        result = when (specMode) {
+        val result = when (specMode) {
             MeasureSpec.AT_MOST -> if (specSize < size) {
                 specSize or MEASURED_STATE_TOO_SMALL
             } else {
@@ -913,10 +912,6 @@ open class View(ctx: Context?, attributeSet: AttributeSet?){
     companion object {
 
         var uuid = 0
-
-        fun thread(func: () -> Unit){
-            setTimeout(func, 0)
-        }
 
         val System = java.util.System
 

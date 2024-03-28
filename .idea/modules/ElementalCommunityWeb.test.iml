@@ -2,10 +2,10 @@
 <module version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration version="5" platform="JavaScript " allPlatforms="JS []" useProjectSettings="false" isTestModule="true" externalProjectId="ElementalCommunityWeb">
+      <configuration version="5" platform="JavaScript " allPlatforms="JS []" useProjectSettings="false" isTestModule="true" externalProjectId="ElementalCommunityWeb" isHmppProject="true">
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <externalSystemTestTasks>
-          <externalSystemTestTask>browserTest|:|js</externalSystemTestTask>
+          <externalSystemTestTask>browserTest|:|js|js</externalSystemTestTask>
         </externalSystemTestTasks>
         <testOutputPath>$MODULE_DIR$/../../build/js/packages/ElementalCommunityWeb-test/kotlin/ElementalCommunityWeb-test.js</testOutputPath>
         <compilerSettings />

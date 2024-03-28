@@ -23,8 +23,7 @@ class ImageDrawable(source: String): Drawable(){
 
     override fun getMinimumHeight(): Int = 0
     override fun getMinimumWidth(): Int = 0
-    override fun draw(canvas: Canvas?) {
-        canvas ?: return
+    override fun draw(canvas: Canvas) {
         if(image.complete && image.naturalWidth != 0){
             canvas.ctx.drawImage(image, left.toDouble(), top.toDouble(), (right-left).toDouble(), (bottom-top).toDouble())
         }// else println("sth went wrong with an svg")

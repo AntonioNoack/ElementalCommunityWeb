@@ -61,8 +61,7 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
     var xZero = 0f
     var xStep = 0f
 
-    override fun onDraw(canvas: Canvas?) {
-        canvas ?: return
+    override fun onDraw(canvas: Canvas) {
         val save = canvas.save()
         super.onDraw(canvas)
         canvas.restoreToCount(save)

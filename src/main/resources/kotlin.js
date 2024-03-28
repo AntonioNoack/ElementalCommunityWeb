@@ -128,7 +128,7 @@
   var OBJECT_HASH_CODE_PROPERTY_NAME = 'kotlinHashCodeValue$';
   function getObjectHashCode(obj) {
     if (!(OBJECT_HASH_CODE_PROPERTY_NAME in obj)) {
-      var hash = Math.random() * POW_2_32 | 0;
+      var hash = Random.nextDouble() * POW_2_32 | 0;
       Object.defineProperty(obj, OBJECT_HASH_CODE_PROPERTY_NAME, {value: hash, enumerable: false});
     }return obj[OBJECT_HASH_CODE_PROPERTY_NAME];
   }
@@ -3165,9 +3165,11 @@
       return $this;
     }
     function sortArrayWith$lambda(closure$comparator) {
+		if(closure$comparator && closure$comparator.compare)
       return function (a, b) {
         return closure$comparator.compare(a, b);
       };
+	   else return function(a,b){ return 0; }
     }
     function sortArrayWith_0(array, comparator) {
       if (getStableSortingIsSupported()) {
@@ -3988,7 +3990,7 @@
       return !isInfinite($receiver) && !isNaN_0($receiver);
     }
     function defaultPlatformRandom() {
-      return Random_0(Math.random() * Math.pow(2, 32) | 0);
+      return Random_0(Random.nextDouble() * Math.pow(2, 32) | 0);
     }
     var INV_2_26;
     var INV_2_53;

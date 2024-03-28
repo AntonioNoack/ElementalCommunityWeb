@@ -1,10 +1,11 @@
 package android.content
 
+import kotlinx.browser.localStorage
 import org.w3c.dom.get
 import org.w3c.dom.set
 import kotlin.browser.localStorage
 
-class LocalStoragePreferences: SharedPreferences {
+object LocalStoragePreferences: SharedPreferences {
 
     override val all: Map<String, *>
         get() = getMap()

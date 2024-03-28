@@ -48,10 +48,8 @@ class SwitchCompat(ctx: Context, attributeSet: AttributeSet?): Button(ctx, attri
     }
 
     val rectf = RectF()
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        canvas ?: return
 
         val goalPosition = if(isChecked) 1f else 0f
         position = mix(position, goalPosition, 0.3f)

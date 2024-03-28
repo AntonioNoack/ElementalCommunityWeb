@@ -2,8 +2,9 @@ package android.content.res
 
 import android.util.DisplayMetrics
 
-class Resources {
+object Resources {
 
+    fun getColor(int: Int, theme: Int) = int
     fun getColor(int: Int) = int
     fun getColor(long: Long) = long.toInt()
 

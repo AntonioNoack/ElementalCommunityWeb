@@ -1,5 +1,7 @@
 package me.antonio.noack.elementalcommunity.utils
 
+import java.util.*
+
 object Compact {
 
     fun compacted(name: String): String {

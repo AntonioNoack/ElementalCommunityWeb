@@ -9,7 +9,7 @@ import me.antonio.noack.maths.MathsUtils.dpToPx
 import me.antonio.noack.maths.MathsUtils.spToPx
 import org.w3c.dom.Element
 
-class AttributeSet(val element: Element? = null){
+class AttributeSet(val element: Element? = null) {
 
     val values = HashMap<String, String>()
 
@@ -19,11 +19,13 @@ class AttributeSet(val element: Element? = null){
             value == "match_parent" -> View.LayoutParams.MATCH_PARENT
             value == "wrap_content" -> View.LayoutParams.WRAP_CONTENT
             value.endsWith("sp") -> {
-                spToPx(value.substring(0, value.length-2).toFloat()).toInt()
+                spToPx(value.substring(0, value.length - 2).toFloat()).toInt()
             }
+
             value.endsWith("dp") -> {
-                dpToPx(value.substring(0, value.length-2).toFloat()).toInt()
+                dpToPx(value.substring(0, value.length - 2).toFloat()).toInt()
             }
+
             else -> value.toInt()
         }
     }
@@ -36,27 +38,27 @@ class AttributeSet(val element: Element? = null){
         return when {
             value.endsWith("sp") -> {
                 // println("$value -> ${spToPx(value.substring(0, value.length-2).toFloat())}")
-                spToPx(value.substring(0, value.length-2).toFloat())
+                spToPx(value.substring(0, value.length - 2).toFloat())
             }
+
             value.endsWith("dp") -> {
-                dpToPx(value.substring(0, value.length-2).toFloat())
+                dpToPx(value.substring(0, value.length - 2).toFloat())
             }
+
             else -> value.toFloat()
         }
     }
+
     fun getBoolean(key: String, default: Boolean) = values[key]?.toBoolean() ?: default
     fun getDrawable(key: String, default: Drawable?): Drawable? {
         val value = values[key] ?: return default
         val toInt = value.toIntOrNull()
-        if(toInt != null) return ColorDrawable(toInt)
+        if (toInt != null) return ColorDrawable(toInt)
         val svg = value.trim()
-        if(svg.startsWith("<")){
-            return SVGDrawable(svg)
-        } else if(svg.startsWith("drawable/")){
-            return ImageDrawable(svg)
-        } else {
-            throw RuntimeException("Unknown drawable $value")
+        return when {
+            svg.startsWith("<") -> SVGDrawable(svg)
+            svg.startsWith("drawable/") -> ImageDrawable(svg)
+            else -> throw RuntimeException("Unknown drawable $value")
         }
     }
-
 }

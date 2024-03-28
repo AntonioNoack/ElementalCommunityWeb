@@ -326,15 +326,13 @@ object Runner {
 
         println("created canvas")
 
-        Runner.measure()
+        measure()
 
         println("measured")
         println(all)
 
         // all.isReady = true
         all.invalidate()
-
-        var downTime = 0.0
 
         window.onresize = {
             canvasElement.width = window.innerWidth
@@ -351,7 +349,6 @@ object Runner {
             mouseButtons = mouseEvent.buttons.toInt()
             val event = MotionEvent(mouseEvent.clientX.toFloat(), mouseEvent.clientY.toFloat(), MotionEvent.ACTION_DOWN)
             processEvent(event)
-            downTime = now()
             true
         }
 

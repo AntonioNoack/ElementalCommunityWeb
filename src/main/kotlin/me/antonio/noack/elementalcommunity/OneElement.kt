@@ -8,43 +8,49 @@ import android.view.View
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawElement
 import kotlin.math.min
 
-class OneElement(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSet) {
+class OneElement(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attributeSet) {
 
     var element: Element? = null
+    var alphaOverride = 255
 
-    var theWidth = 350f
+    private var calcWidth = 350f
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val mode = MeasureSpec.getMode(widthMeasureSpec)
-        when(mode){
+        when (MeasureSpec.getMode(widthMeasureSpec)) {
             MeasureSpec.EXACTLY -> {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-                theWidth = measuredWidth.toFloat()
+                calcWidth = measuredWidth.toFloat()
             }
-            MeasureSpec.UNSPECIFIED -> {
-
-            }
+            MeasureSpec.UNSPECIFIED -> {}
             MeasureSpec.AT_MOST -> {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-                theWidth = min(measuredWidth.toFloat(), theWidth)
+                calcWidth = min(measuredWidth.toFloat(), calcWidth)
             }
         }
-        setMeasuredDimension(theWidth.toInt(), theWidth.toInt())
+        setMeasuredDimension(calcWidth.toInt(), calcWidth.toInt())
     }
 
     private val bgPaint = Paint()
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    init {textPaint.textAlign = Paint.Align.CENTER }
 
-    override fun onDraw(canvas: Canvas?) {
+    init {
+        textPaint.textAlign = Paint.Align.CENTER
+    }
+
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if(canvas == null) return
 
         GroupsEtc.tick()
 
         val candidate = element
         val width = measuredWidth * 1f
-        drawElement(canvas, -1,0f, 0f, 0f, width, true, candidate?.name ?: "???", candidate?.group ?: 15, -1, bgPaint, textPaint)
+        bgPaint.alpha = alphaOverride
+        textPaint.alpha = alphaOverride
+        drawElement(
+            canvas, -1, 0f, 0f, 0f, width, true,
+            candidate?.name ?: "???", candidate?.group ?: 15, -1,
+            bgPaint, textPaint
+        )
 
     }
 

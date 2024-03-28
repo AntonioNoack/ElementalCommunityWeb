@@ -27,6 +27,7 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.math.MathUtils.clamp
+import kotlinx.browser.localStorage
 import me.antonio.noack.maths.MathsUtils.originalSpFactor
 import me.antonio.noack.maths.MathsUtils.spFactor
 import me.antonio.noack.webdroid.Runner
@@ -480,8 +481,7 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
         if(getId() == "appZoom"){
             println("Registered AppZoom")
             val scaleDetector = ScaleGestureDetector(context, object: ScaleGestureDetector.OnScaleGestureListener {
-                override fun onScale(detector: ScaleGestureDetector?): Boolean {
-                    detector ?: return false
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
                     val newScale = clamp(spFactor * detector.scaleFactor, 0.1f * originalSpFactor, 10f * originalSpFactor)
                     return if(newScale != spFactor){
                         localStorage["spMultiplier"] = "${newScale / originalSpFactor}"
@@ -491,8 +491,8 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
                         true
                     } else false
                 }
-                override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean = false
-                override fun onScaleEnd(detector: ScaleGestureDetector?) {}
+                override fun onScaleBegin(detector: ScaleGestureDetector): Boolean = false
+                override fun onScaleEnd(detector: ScaleGestureDetector) {}
             })
             setOnTouchListener { _, event -> scaleDetector.onTouchEvent(event) }
         }
@@ -516,7 +516,7 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
     }
 
     
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         if (dividerDrawable == null) {
             super.onDraw(canvas)
             return
@@ -531,7 +531,7 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
         super.onDraw(canvas)
     }
 
-    fun drawDividersVertical(canvas: Canvas?) {
+    fun drawDividersVertical(canvas: Canvas) {
         val count = virtualChildCount
         for (i in 0 until count) {
             val child = getVirtualChildAt(i)
@@ -557,7 +557,7 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
         }
     }
 
-    fun drawDividersHorizontal(canvas: Canvas?) {
+    fun drawDividersHorizontal(canvas: Canvas) {
         val count = virtualChildCount
         val isLayoutRtl = isLayoutRtl()
         for (i in 0 until count) {
@@ -597,13 +597,13 @@ open class LinearLayout constructor(context: Context?, attrs: AttributeSet? = nu
         }
     }
 
-    fun drawHorizontalDivider(canvas: Canvas?, top: Int) {
+    fun drawHorizontalDivider(canvas: Canvas, top: Int) {
         dividerDrawable!!.setBounds(getPaddingLeft() + mDividerPadding, top,
                 getWidth() - getPaddingRight() - mDividerPadding, top + mDividerHeight)
         dividerDrawable!!.draw(canvas)
     }
 
-    fun drawVerticalDivider(canvas: Canvas?, left: Int) {
+    fun drawVerticalDivider(canvas: Canvas, left: Int) {
         dividerDrawable!!.setBounds(left, getPaddingTop() + mDividerPadding,
                 left + dividerWidth, getHeight() - getPaddingBottom() - mDividerPadding)
         dividerDrawable!!.draw(canvas)

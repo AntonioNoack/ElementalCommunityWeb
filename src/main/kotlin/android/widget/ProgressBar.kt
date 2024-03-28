@@ -28,9 +28,8 @@ open class ProgressBar(ctx: Context, attributeSet: AttributeSet? = null): View(c
 
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas ?: return
 
         canvas.translate(mPaddingLeft, mPaddingTop)
         // todo draw the progress

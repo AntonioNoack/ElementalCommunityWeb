@@ -11,9 +11,8 @@ import kotlin.math.sqrt
 
 open class Button(ctx: Context, attributeSet: AttributeSet?): TextView(ctx, attributeSet){
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas ?: return
         if(isButtonDown){
             canvas.fillRect(mLeft, mTop, mRight, mBottom, 0x11111111)
         }

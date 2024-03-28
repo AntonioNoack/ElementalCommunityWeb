@@ -7,16 +7,16 @@ import android.graphics.drawable.ColorDrawable
 import android.view.*
 import android.widget.Button
 import android.widget.LinearLayout
+import kotlinx.browser.document
 import me.antonio.noack.maths.MathsUtils.dpToPx
 import me.antonio.noack.webdroid.Runner
-import kotlin.browser.document
 import kotlin.math.max
 import kotlin.math.min
 
 class AlertDialog(val child: View): Dialog(child.context, null){
 
     var title = ""
-    val window: Window? = Window.instance
+    val window: Window = Window.instance
 
     override fun onInit() {
         super.onInit()
@@ -96,7 +96,7 @@ class AlertDialog(val child: View): Dialog(child.context, null){
     }
 
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if(Runner.dialogStack.peek() == this){
             document.title = title
@@ -116,7 +116,7 @@ class AlertDialog(val child: View): Dialog(child.context, null){
         }
 
         fun setView(view: View): Builder {
-            this.view = view?.clone()
+            this.view = view.clone()
             return this
         }
 
@@ -134,10 +134,10 @@ class AlertDialog(val child: View): Dialog(child.context, null){
             if(view == null) view = getDefaultView()
             view?.addChild(
                     Button(context, null)
-                            .withAttribute("text", text)
-                            .withAttribute("width", 0)
-                            .withAttribute("height", LayoutParams.WRAP_CONTENT)
-                            .withAttribute("weight", 1)
+                            .attr("text", text)
+                            .attr("width", 0)
+                            .attr("height", LayoutParams.WRAP_CONTENT)
+                            .attr("weight", 1)
                             .setOnClickListener {
                                 println("yes")
                                 listener?.invoke(dialog!!, 0)
@@ -151,10 +151,10 @@ class AlertDialog(val child: View): Dialog(child.context, null){
             if(view == null) view = getDefaultView()
             view?.addChild(
                     Button(context, null)
-                            .withAttribute("text", text)
-                            .withAttribute("width", 0)
-                            .withAttribute("height", LayoutParams.WRAP_CONTENT)
-                            .withAttribute("weight", 1)
+                            .attr("text", text)
+                            .attr("width", 0)
+                            .attr("height", LayoutParams.WRAP_CONTENT)
+                            .attr("weight", 1)
                             .setOnClickListener {
                                 println("no")
                                 listener?.invoke(dialog!!, 0)
@@ -180,10 +180,10 @@ class AlertDialog(val child: View): Dialog(child.context, null){
 
         fun getDefaultView(): View {
             return LinearLayout(context, null)
-                    .withAttribute("background", 0xff000000.toInt())
-                    .withAttribute("orientation", "horizontal")
-                    .withAttribute("width", LayoutParams.MATCH_PARENT)
-                    .withAttribute("height", LayoutParams.WRAP_CONTENT)
+                    .attr("background", 0xff000000.toInt())
+                    .attr("orientation", "horizontal")
+                    .attr("width", LayoutParams.MATCH_PARENT)
+                    .attr("height", LayoutParams.WRAP_CONTENT)
         }
 
     }
@@ -227,7 +227,6 @@ class AlertDialog(val child: View): Dialog(child.context, null){
                 return true
             }
         }
-        if(event.call(this)) return true
-        return false
+        return event.call(this)
     }
 }

@@ -1,27 +1,19 @@
 package android.view
 
-class LayoutInflater {
+object LayoutInflater {
 
-    fun inflate(id: View, parent: View, append: Boolean): View {
-
+    fun inflate(id: View, parent: View, append: Boolean = true): View {
         val view = id.clone()
-        if(append){
+        if (append) {
             parent.addChild(view)
         }
-
         return view
-
     }
 
-    fun inflate(id: View, append: Boolean, parent: View){
-
+    fun inflate(id: View, append: Boolean, parent: View) {
         val view = id.clone()
-        if(append){
+        if (append) {
             parent.addChild(view)
         }
-    }
-
-    companion object {
-        val instance = LayoutInflater()
     }
 }

@@ -5,14 +5,14 @@ import android.widget.Toast
 import me.antonio.noack.maths.MathsUtils.sq
 import kotlin.math.sqrt
 
-class ScaleGestureDetector(val ctx: Context?, val listener: ScaleGestureDetector.OnScaleGestureListener){
+class ScaleGestureDetector(val ctx: Context?, val listener: OnScaleGestureListener){
 
     var scaleFactor = 1f
 
     interface OnScaleGestureListener {
-        fun onScale(detector: ScaleGestureDetector?): Boolean
-        fun onScaleBegin(detector: ScaleGestureDetector?): Boolean
-        fun onScaleEnd(detector: ScaleGestureDetector?)
+        fun onScale(detector: ScaleGestureDetector): Boolean
+        fun onScaleBegin(detector: ScaleGestureDetector): Boolean
+        fun onScaleEnd(detector: ScaleGestureDetector)
     }
 
     var d1 = -1f

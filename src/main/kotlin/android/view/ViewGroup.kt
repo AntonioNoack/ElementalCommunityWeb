@@ -42,9 +42,8 @@ open class ViewGroup(ctx: Context?, attributeSet: AttributeSet?): View(ctx, attr
         return null
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas ?: return
         for(child in children){
             if(child.isEffectivelyVisible()){
                 val save = canvas.save()

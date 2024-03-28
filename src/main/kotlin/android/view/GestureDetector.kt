@@ -4,17 +4,26 @@ import android.content.Context
 import me.antonio.noack.webdroid.Runner.now
 import kotlin.math.sqrt
 
-class GestureDetector(val ctx: Context?, val listener: OnGestureListener){
+class GestureDetector(val ctx: Context?, val listener: OnGestureListener) {
 
-    constructor(listener: OnGestureListener): this(null, listener)
+    constructor(listener: OnGestureListener) : this(null, listener)
 
     interface OnGestureListener {
-        fun onShowPress(e: MotionEvent?)
-        fun onDown(event: MotionEvent?): Boolean
-        fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean
-        fun onScroll(event: MotionEvent?, e2: MotionEvent?, dx: Float, dy: Float): Boolean
-        fun onLongPress(e: MotionEvent?)
-        fun onSingleTapUp(event: MotionEvent?): Boolean
+        fun onShowPress(e: MotionEvent)
+        fun onDown(event: MotionEvent): Boolean
+        fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean
+        fun onScroll(event: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean
+        fun onLongPress(e: MotionEvent)
+        fun onSingleTapUp(event: MotionEvent): Boolean
+    }
+
+    open class SimpleOnGestureListener : OnGestureListener {
+        override fun onShowPress(e: MotionEvent) {}
+        override fun onDown(event: MotionEvent): Boolean = false
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
+        override fun onScroll(event: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean = false
+        override fun onLongPress(e: MotionEvent) {}
+        override fun onSingleTapUp(event: MotionEvent): Boolean = false
     }
 
     var lastTime = 0.0
@@ -26,7 +35,7 @@ class GestureDetector(val ctx: Context?, val listener: OnGestureListener){
     fun onTouchEvent(event: MotionEvent?): Boolean {
         event ?: return false
         lastTime = now()
-        when(event.actionMasked){
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 motionDistance = 0f
                 lastX = event.originalX
@@ -34,30 +43,33 @@ class GestureDetector(val ctx: Context?, val listener: OnGestureListener){
                 startTime = event.time
                 return listener.onDown(event)
             }
+
             MotionEvent.ACTION_MOVE -> {
-                val returnValue = if(lastX > -1f){
+                val returnValue = if (lastX > -1f) {
                     val deltaX = lastX - event.originalX
                     val deltaY = lastY - event.originalY
                     motionDistance += sqrt(sq(deltaX, deltaY))
-                    listener.onScroll(event, null, deltaX, deltaY)
+                    listener.onScroll(event, event, deltaX, deltaY)
                 } else true
                 lastX = event.originalX
                 lastY = event.originalY
                 return returnValue
             }
+
             MotionEvent.ACTION_UP -> {
-                if(motionDistance < 30f){
-                    if(event.time - startTime > 0.3) listener.onLongPress(event)
+                if (motionDistance < 30f) {
+                    if (event.time - startTime > 0.3) listener.onLongPress(event)
                     return listener.onSingleTapUp(event)
                 }
             }
+
             MotionEvent.ACTION_SCROLL -> {
-                listener.onScroll(event, null, event.motionDX, event.motionDY)
+                listener.onScroll(event, event, event.motionDX, event.motionDY)
             }
         }
         return false
     }
 
-    fun sq(x: Float, y: Float) = x*x+y*y
+    fun sq(x: Float, y: Float) = x * x + y * y
 
 }

@@ -291,7 +291,7 @@ interface SharedPreferences {
      * @throws ClassCastException
      */
     
-    fun getStringSet(key: String, defValues: Set<String>): Set<String>
+    fun getStringSet(key: String, defValues: Set<String>): Set<String>?
 
     /**
      * Retrieve an int value from the preferences.

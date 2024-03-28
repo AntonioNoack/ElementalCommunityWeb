@@ -20,11 +20,9 @@ object Captcha {
     }
 
     fun get(all: AllManager, onSuccess: (String) -> Unit, onError: (Exception) -> Unit){
-
         askCaptcha(onSuccess) {
             onError(Exception())
         }
-
     }
 
 }

@@ -24,9 +24,8 @@ class ToastView(ctx: Context?, attributeSet: AttributeSet?): View(ctx, attribute
 
     val paint = Paint()
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas ?: return
 
         val thisTime = now()
         time += (thisTime - lastTime).toFloat()
