@@ -103,7 +103,7 @@ class AlertDialog(val child: View) : Dialog(child.context, null) {
         fun setView(id: String): Builder {
             return setView(
                 R.layout.allLayouts.first {
-                    it.attributeSet.values["layoutId"] == id
+                    it.attributeSet.values["layout_id"] == id
                 }
             )
         }

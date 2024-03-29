@@ -124,7 +124,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "add_recipe")
+                .attr("layout_id", "add_recipe")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -216,7 +216,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "add_recipe_base")
+                .attr("layout_id", "add_recipe_base")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -245,7 +245,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "match_parent")
                 .attr("id", "flipper")
-                .attr("layoutId", "all_pages")
+                .attr("layout_id", "all_pages")
                 .addView(menu)
                 .addView(game)
                 .addView(mandala)
@@ -263,7 +263,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "ask_override")
+                .attr("layout_id", "ask_override")
                 .addView(
                     Button(all, null)
                         .attr("background", color.colorPrimary)
@@ -318,7 +318,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "ask_password")
+                .attr("layout_id", "ask_password")
                 .addView(
                     FrameLayout(all, null)
                         .attr("background", color.colorPrimary)
@@ -388,7 +388,7 @@ object R {
                 .attr("id", "combinerLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "combiner")
+                .attr("layout_id", "combiner")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
@@ -458,7 +458,7 @@ object R {
                 .attr("layout_width", "wrap_content")
                 .attr("layout_height", "wrap_content")
                 .attr("orientation", "horizontal")
-                .attr("layoutId", "diamond_bar")
+                .attr("layout_id", "diamond_bar")
                 .addView(
                     View(all, null)
                         .attr("background", color.colorPrimaryDark)
@@ -496,7 +496,7 @@ object R {
                 .attr("id", "gameLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "game")
+                .attr("layout_id", "game")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
@@ -566,7 +566,7 @@ object R {
                 .attr("id", "graphLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "graph")
+                .attr("layout_id", "graph")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
@@ -610,7 +610,7 @@ object R {
                 .attr("padding", "5dp")
                 .attr("layout_marginTop", "5dp")
                 .attr("orientation", "horizontal")
-                .attr("layoutId", "helper_offer")
+                .attr("layout_id", "helper_offer")
                 .addView(
                     View(all, null)
                         .attr("layout_width", "0dp")
@@ -669,7 +669,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "wrap_content")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "helper_search_recipe")
+                .attr("layout_id", "helper_search_recipe")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -709,7 +709,7 @@ object R {
                 .attr("id", "itempedia")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "itempedia")
+                .attr("layout_id", "itempedia")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
@@ -779,7 +779,7 @@ object R {
             ScrollView(all, null)
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "wrap_content")
-                .attr("layoutId", "itempedia_item")
+                .attr("layout_id", "itempedia_item")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -1091,7 +1091,7 @@ object R {
                 .attr("text", "423")
                 .attr("textSize", "22sp")
                 .attr("layout_marginBottom", "4dp")
-                .attr("layoutId", "itempedia_page")
+                .attr("layout_id", "itempedia_page")
                 .attr("textColor", 0xffffffff.toInt())
                 .attr("layout_width", "50dp")
                 .attr("background", color.colorPrimary)
@@ -1107,7 +1107,7 @@ object R {
                 .attr("id", "mandalaLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "mandala")
+                .attr("layout_id", "mandala")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
@@ -1149,7 +1149,7 @@ object R {
                 .attr("background", 0xffffffff.toInt())
                 .attr("id", "menuLayout")
                 .attr("layout_height", "match_parent")
-                .attr("layoutId", "menu")
+                .attr("layout_id", "menu")
                 .addView(
                     me.antonio.noack.elementalcommunity.NewsView(all, null)
                         .attr("layout_width", "match_parent")
@@ -1184,7 +1184,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "wrap_content")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "menu_content")
+                .attr("layout_id", "menu_content")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -1325,7 +1325,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "progress_load")
+                .attr("layout_id", "progress_load")
                 .addView(
                     Button(all, null)
                         .attr("background", color.colorPrimary)
@@ -1379,7 +1379,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "progress_save")
+                .attr("layout_id", "progress_save")
                 .addView(
                     Button(all, null)
                         .attr("background", color.colorPrimary)
@@ -1432,7 +1432,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "random")
+                .attr("layout_id", "random")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -1553,7 +1553,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "5dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "recipe_helper")
+                .attr("layout_id", "recipe_helper")
                 .addView(
                     LinearLayout(all, null)
                         .attr("background", color.colorDiamond)
@@ -1612,7 +1612,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("layout_marginTop", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "select_file")
+                .attr("layout_id", "select_file")
                 .addView(
                     TextView(all, null)
                         .attr("background", color.colorPrimary)
@@ -1632,7 +1632,7 @@ object R {
                 .attr("layout_height", "match_parent")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "select_folder")
+                .attr("layout_id", "select_folder")
                 .addView(
                     TextView(all, null)
                         .attr("background", color.colorPrimary)
@@ -1710,7 +1710,7 @@ object R {
                 .attr("id", "settingsLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "settings")
+                .attr("layout_id", "settings")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -1935,7 +1935,7 @@ object R {
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "show_password")
+                .attr("layout_id", "show_password")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -1992,7 +1992,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
-                .attr("layoutId", "switch_server")
+                .attr("layout_id", "switch_server")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -2111,7 +2111,7 @@ object R {
                 .attr("layout_width", "match_parent")
                 .attr("layout_height", "wrap_content")
                 .attr("padding", "10dp")
-                .attr("layoutId", "switch_server_create")
+                .attr("layout_id", "switch_server_create")
                 .addView(
                     LinearLayout(all, null)
                         .attr("layout_width", "match_parent")
@@ -2199,7 +2199,7 @@ object R {
                 .attr("id", "treeLayout")
                 .attr("layout_height", "match_parent")
                 .attr("orientation", "vertical")
-                .attr("layoutId", "tree")
+                .attr("layout_id", "tree")
                 .addView(
                     me.antonio.noack.elementalcommunity.LoadingBarView(all, null)
                         .attr("layout_width", "match_parent")
