@@ -491,10 +491,7 @@ open class View(ctx: Context?, attributeSet: AttributeSet?) {
     }
 
     open fun processEvent(event: Event, ox: Float, oy: Float, dx: Int, dy: Int): View? {
-        return if (event.call(this)) {
-            println("Finished processing $event at ${this::class.simpleName}")
-            this
-        } else null
+        return if (event.call(this)) this else null
     }
 
     open fun addView(view: View): ViewGroup {
