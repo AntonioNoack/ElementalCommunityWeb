@@ -337,8 +337,7 @@ class AllManager : AppCompatActivity() {
     private fun createItempediaPages(numElements: Int) {
         val pageList = findViewById<LinearLayout>(R.id.pageFlipper)!!
         pageList.removeAllViews()
-        // todo revert this
-        val numPages = 100 // (numElements + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE
+        val numPages = (numElements + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE
         val views = ArrayList<TextView>()
         var previouslyClicked = 0
         fun openPage(i: Int) {
