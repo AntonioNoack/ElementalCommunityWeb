@@ -23,9 +23,6 @@ class SVGDrawable(source: String) : Drawable() {
     private val image = Image()
 
     init {
-        image.onload = {
-            println("loaded svg")
-        }
         image.onerror = { a, b, c, d, e ->
             console.log("error in svg $source", listOf(a, b, c, d, e))
         }
@@ -44,6 +41,6 @@ class SVGDrawable(source: String) : Drawable() {
                 (right - left).toDouble(),
                 (bottom - top).toDouble()
             )
-        }// else println("sth went wrong with an svg")
+        }
     }
 }

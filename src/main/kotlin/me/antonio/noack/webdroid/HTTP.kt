@@ -16,7 +16,6 @@ object HTTP {
                 if(x.status == 200.toShort()){
                     if(!sentResponse){
                         sentResponse = true
-                        // println(x.responseText)
                         onSuccess(x.responseText)
                     }
                 } else onError(IOException("${x.status}"))
@@ -38,7 +37,6 @@ object HTTP {
                 if(x.status == 200.toShort()){
                     if(!sentResponse){
                         sentResponse = true
-                        // println(x.responseText)
                         onSuccess(x.responseText)
                     }
                 } else onError(IOException("${x.status}"))

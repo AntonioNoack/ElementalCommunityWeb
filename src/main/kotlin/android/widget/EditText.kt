@@ -77,7 +77,6 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-
         val helpOnly = text.isBlank()
         val text = if (helpOnly) hint else text
 
@@ -87,19 +86,8 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
         minimumWidth = this.measuredWidth + paddingLeft + paddingRight
         minimumHeight = textSize.toInt() + paddingTop + paddingBottom
 
-        // println("$text @ ${paint.textSize} = $mMinWidth x $mMinHeight")
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
-        println(
-            "min: $minimumWidth -> ${this.measuredWidth}, $minimumHeight -> ${this.measuredHeight}, ${
-                MeasureSpec.toString(
-                    widthMeasureSpec
-                )
-            }, ${MeasureSpec.toString(heightMeasureSpec)}"
-        )
-
         onVisibilityChanged()
-
     }
 
     override fun onDraw(canvas: Canvas) {

@@ -117,9 +117,6 @@ class Tree {
             val offset = (maxPerRow - rest) / 2
 
             for ((indexX, element) in list.withIndex()) {
-
-                // println("${element.name}: ${element.rank}")
-
                 if (indexX < maxFull) {
                     // a full position
                     val rawX = indexX % maxPerRow

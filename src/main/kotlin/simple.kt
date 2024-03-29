@@ -1,3 +1,5 @@
+import me.antonio.noack.webdroid.Runner
+
 fun main() {
-    me.antonio.noack.webdroid.main()
+    Runner.run()
 }

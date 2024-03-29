@@ -27,13 +27,12 @@ open class ScrollView(ctx: Context?, attributeSet: AttributeSet?) : FrameLayout(
             override fun onDown(event: MotionEvent): Boolean = false
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
             override fun onLongPress(e: MotionEvent) {}
+            override fun onShowPress(e: MotionEvent) {}
+            override fun onSingleTapUp(event: MotionEvent): Boolean = false
             override fun onScroll(event: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
                 checkScroll(dy, true)
                 return true
             }
-
-            override fun onShowPress(e: MotionEvent) {}
-            override fun onSingleTapUp(event: MotionEvent): Boolean = false
         })
         setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
     }

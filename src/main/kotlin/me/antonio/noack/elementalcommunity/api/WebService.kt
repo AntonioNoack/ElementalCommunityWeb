@@ -132,9 +132,6 @@ open class WebService(private val serverURL: String) : ServerService {
         onError: (Exception) -> Unit
     ) {
 
-        println("asking for $a + $b = ?")
-        println("offline? ${AllManager.offlineMode}")
-
         if (AllManager.offlineMode) {
             CombinationCache.askInEmergency(all, a, b, onSuccess)
             return

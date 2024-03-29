@@ -98,17 +98,10 @@ open class LinearLayout(context: Context?, attrs: AttributeSet? = null) : ViewGr
         if (weightSum > 0f) {
             if (isX) { // remaining space / weight sum
                 wPerWeight = max((contentWidth - sumW) / weightSum, 0f)
-                // println("${tabs(depth)} Remaining x: ($contentWidth - $sumW)/$weightSum -> $wPerWeight")
             } else {
                 hPerWeight = max((contentHeight - sumH) / weightSum, 0f)
-                // println("${tabs(depth)}Remaining y: ($contentHeight - $sumH)/$weightSum -> $hPerWeight")
             }
         }
-        /*println(
-            "${tabs(depth)}LinearLayout " +
-                    "${MeasureSpec.toString(widthMeasureSpec)} x " +
-                    "${MeasureSpec.toString(heightMeasureSpec)}: $isX, $wPerWeight/$hPerWeight"
-        )*/
         var doneX = 0
         var doneY = 0
         val totalX =

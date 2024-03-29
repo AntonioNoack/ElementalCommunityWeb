@@ -33,23 +33,14 @@ class AttributeSet(val element: Element? = null) {
     fun getString(key: String, default: String) = values[key] ?: default
     fun getInt(key: String, default: Int) = values[key]?.toInt() ?: default
     fun getFloat(key: String, default: Float): Float {
-        // println("$key $default ${values[key]}")
         val value = values[key]?.toLowerCase() ?: return default
         return when {
-            value.endsWith("sp") -> {
-                // println("$value -> ${spToPx(value.substring(0, value.length-2).toFloat())}")
-                spToPx(value.substring(0, value.length - 2).toFloat())
-            }
-
-            value.endsWith("dp") -> {
-                dpToPx(value.substring(0, value.length - 2).toFloat())
-            }
-
+            value.endsWith("sp") -> spToPx(value.substring(0, value.length - 2).toFloat())
+            value.endsWith("dp") -> dpToPx(value.substring(0, value.length - 2).toFloat())
             else -> value.toFloat()
         }
     }
 
-    fun getBoolean(key: String, default: Boolean) = values[key]?.toBoolean() ?: default
     fun getDrawable(key: String, default: Drawable?): Drawable? {
         val value = values[key] ?: return default
         val toInt = value.toIntOrNull()

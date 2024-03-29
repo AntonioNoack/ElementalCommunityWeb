@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.core.math.MathUtils.clamp
-import me.antonio.noack.webdroid.Runner.now
+import me.antonio.noack.webdroid.Runner.currentTimeSeconds
 import kotlin.math.round
 
 class SeekBar(ctx: Context, attributeSet: AttributeSet?) : ProgressBar(ctx, attributeSet) {
@@ -44,7 +44,7 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?) : ProgressBar(ctx, attr
                         if (progress != this.progress) {
                             this.progress = progress
                             listener?.onProgressChanged(this, progress, true)
-                            lastTime = now()
+                            lastTime = currentTimeSeconds()
                             draggedTimer = 1.0
                             invalidate()
                         }
@@ -86,7 +86,7 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?) : ProgressBar(ctx, attr
 
         if (draggedTimer > 0.0) {
 
-            val thisTime = now()
+            val thisTime = currentTimeSeconds()
             val dt = clamp(thisTime - lastTime, 0.0, 0.5)
             lastTime = thisTime
             draggedTimer -= dt * 3

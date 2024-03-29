@@ -2,7 +2,7 @@ package android.widget
 
 import android.content.Context
 import me.antonio.noack.webdroid.Runner
-import me.antonio.noack.webdroid.Runner.now
+import me.antonio.noack.webdroid.Runner.currentTimeSeconds
 
 object Toast {
 
@@ -12,7 +12,7 @@ object Toast {
             toastView.text = msg
             toastView.time = 0f
             toastView.isDone = false
-            toastView.lastTime = now()
+            toastView.lastTime = currentTimeSeconds()
             toastView.duration = when(length){
                 LENGTH_LONG -> 10f
                 LENGTH_SHORT -> 3f

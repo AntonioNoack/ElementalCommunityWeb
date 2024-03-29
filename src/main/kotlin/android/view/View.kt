@@ -487,19 +487,12 @@ open class View(ctx: Context?, attributeSet: AttributeSet?) {
     }
 
     fun processEvent(event: Event): View? {
-        val ox = event.x
-        val oy = event.y
-        val returnValue = processEvent(event, ox, oy, 0, 0)
-        event.dx = 0
-        event.dy = 0
-        event.x = ox
-        event.y = oy
-        return returnValue
+        return processEvent(event, event.x, event.y, 0, 0)
     }
 
     open fun processEvent(event: Event, ox: Float, oy: Float, dx: Int, dy: Int): View? {
         return if (event.call(this)) {
-            println("finished processing $event at ${this::class.simpleName}")
+            println("Finished processing $event at ${this::class.simpleName}")
             this
         } else null
     }

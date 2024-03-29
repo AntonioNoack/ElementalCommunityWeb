@@ -1,8 +1,7 @@
 # ElementalCommunityWeb
-Web Edition of Elemental Community (frontend only)
+Web Edition of [Elemental Community](https://github.com/AntonioNoack/ElementalCommunity) (frontend only)
 
 ## Play Game
-
 To play the game, visit [its website](https://elemental.phychi.com).
 
 ## Technical Overview

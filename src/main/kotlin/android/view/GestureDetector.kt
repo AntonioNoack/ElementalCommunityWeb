@@ -27,7 +27,6 @@ class GestureDetector(val ctx: Context?, val listener: OnGestureListener) {
 
     private var motionDistance = 0f
     private var startTime = 0.0
-    private var isDown = false
 
     fun onTouchEvent(event: MotionEvent?): Boolean {
         event ?: return false
@@ -35,22 +34,18 @@ class GestureDetector(val ctx: Context?, val listener: OnGestureListener) {
             MotionEvent.ACTION_DOWN -> {
                 motionDistance = 0f
                 startTime = event.time
-                isDown = true
-                return listener.onDown(event)
+                listener.onDown(event)
             }
             MotionEvent.ACTION_MOVE -> {
-                if (isDown) {
-                    val deltaX = event.motionDX
-                    val deltaY = event.motionDY
-                    motionDistance += sqrt(deltaX * deltaX + deltaY * deltaY)
-                    listener.onScroll(event, event, deltaX, deltaY)
-                }
+                val deltaX = event.motionDX
+                val deltaY = event.motionDY
+                motionDistance += sqrt(deltaX * deltaX + deltaY * deltaY)
+                listener.onScroll(event, event, deltaX, deltaY)
             }
             MotionEvent.ACTION_UP -> {
-                isDown = false
                 if (motionDistance < 30f) {
                     if (event.time - startTime > 0.3) listener.onLongPress(event)
-                    return listener.onSingleTapUp(event)
+                    listener.onSingleTapUp(event)
                 }
             }
             MotionEvent.ACTION_SCROLL -> {

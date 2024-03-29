@@ -26,9 +26,8 @@ object GroupsEtc {
         val timeout = 5 * 1000000000L
         for ((_, cache) in cacheBySize.entries) {
             if (cache.map.isNotEmpty() && abs(cache.lastTime - time) > timeout) {
-                // println("cleared ${cache.size}")
                 cache.map.clear()
-            }// else println("${abs(cache.lastTime - time)}")
+            }
         }
     }
 
@@ -182,14 +181,12 @@ object GroupsEtc {
             // todo split preferably at .,*- or something like that?
             val maxString = maxPart.value
             if (maxString.length > limit) {
-                // println("gonna split this string, $maxString")
                 val centerIndex = maxString.length / (count + 1 - parts.size)
                 parts = parts.subList(0, maxPart.index) + listOf(
                     maxString.substring(0, centerIndex), maxString.substring(centerIndex)
                 ) + parts.subList(maxPart.index + 1, parts.size)
             } else break
         }
-        // println("split $this into $parts")
         return parts
     }
 

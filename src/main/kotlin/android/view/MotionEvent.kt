@@ -27,7 +27,19 @@ open class MotionEvent(
         return view.touchListener?.invoke(view, this) ?: false
     }
 
-    override fun toString(): String = "MotionEvent[$x $y $actionMasked]"
+    override fun toString(): String = "MotionEvent[($x,$y)|($motionDX,$motionDY)|${
+        when (actionMasked) {
+            ACTION_DOWN -> "down"
+            ACTION_UP -> "up"
+            ACTION_MOVE -> "move"
+            ACTION_HOVER_MOVE -> "hover-move"
+            ACTION_POINTER_DOWN -> "ptr-down"
+            ACTION_POINTER_UP -> "ptr-up"
+            ACTION_ZOOM -> "zoom"
+            ACTION_SCROLL -> "scroll"
+            else -> "?"
+        }
+    }]"
 
     companion object {
         const val ACTION_DOWN = 0

@@ -32,7 +32,6 @@ class HorizontalScrollView(ctx: Context, attributeSet: AttributeSet?) : ViewGrou
                 checkScroll(dx, true)
                 return true
             }
-
             override fun onShowPress(e: MotionEvent) {}
             override fun onSingleTapUp(event: MotionEvent): Boolean = false
         })

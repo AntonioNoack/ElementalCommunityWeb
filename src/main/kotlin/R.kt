@@ -1476,6 +1476,7 @@ object R {
                                         .attr("id", "first")
                                         .attr("layout_height", "wrap_content")
                                         .attr("layout_weight", "1")
+                                        .attr("gravity", "center")
                                 )
                                 .addView(
                                     me.antonio.noack.elementalcommunity.OneElement(all, null)
@@ -1483,6 +1484,7 @@ object R {
                                         .attr("id", "second")
                                         .attr("layout_height", "wrap_content")
                                         .attr("layout_weight", "1")
+                                        .attr("gravity", "center")
                                 )
                         )
                         .addView(

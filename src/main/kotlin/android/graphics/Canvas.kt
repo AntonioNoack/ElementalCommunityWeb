@@ -11,7 +11,6 @@ class Canvas(val ctx: CanvasRenderingContext2D){
     var ctr = 0
 
     fun fillRect(left: Int, top: Int, right: Int, bottom: Int, color: Int){
-        // println("draw $left, $top, $right, $bottom, ${colorString(color)}, #${colorString(color)}")
         ctx.fillStyle = rgbaString(color)
         ctx.fillRect(left.toDouble(), top.toDouble(), (right-left).toDouble(), (bottom-top).toDouble())
     }
@@ -184,9 +183,7 @@ class Canvas(val ctx: CanvasRenderingContext2D){
         setBounds(left.toDouble(), top.toDouble(), right.toDouble(), bottom.toDouble())
     }
 
-    fun setBounds(left: Double, top: Double, right: Double, bottom: Double){
-        // println("bounds $ctr $left, $top, $right, $bottom")
-        // lineRect(left, top, right, bottom, -1)
+    private fun setBounds(left: Double, top: Double, right: Double, bottom: Double){
         ctx.beginPath()
         ctx.moveTo(left, top)
         ctx.lineTo(right, top)

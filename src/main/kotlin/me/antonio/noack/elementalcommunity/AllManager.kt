@@ -337,7 +337,8 @@ class AllManager : AppCompatActivity() {
     private fun createItempediaPages(numElements: Int) {
         val pageList = findViewById<LinearLayout>(R.id.pageFlipper)!!
         pageList.removeAllViews()
-        val numPages = (numElements + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE
+        // todo revert this
+        val numPages = 100 // (numElements + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE
         val views = ArrayList<TextView>()
         var previouslyClicked = 0
         fun openPage(i: Int) {
@@ -431,8 +432,6 @@ class AllManager : AppCompatActivity() {
         showElementUUID = pref.getBoolean("showElementUUID", true)
         offlineMode = pref.getBoolean("offlineMode", false)
 
-        println("offline mode? $offlineMode")
-
         WebServices.serverInstance = pref.getInt("serverInstance", 0)
         WebServices.serverName = pref.getString("serverName", "Default")!!
 
@@ -469,11 +468,9 @@ class AllManager : AppCompatActivity() {
 
         saveElement2 = { element ->
             MusicScheduler.tick()
-            if (null != Unit) {
-                val edit = pref.edit()
-                saveElement(edit, element)
-                edit.apply()
-            }
+            val edit = pref.edit()
+            saveElement(edit, element)
+            edit.apply()
         }
 
         saveFavourites = {
@@ -573,18 +570,14 @@ class AllManager : AppCompatActivity() {
                     reader.input = valueStr
                     val name = reader.readString(';', ';', "")
                     val group = reader.readInt(';', ';', -1)
-                    // println("parsing $valueStr for id $id -> '$name', $group")
                     if (group < 0) continue
                     val craftCount = reader.readInt(';', ';', -1)
                     val wasCrafted = reader.readInt(';', ';', 0) > 0
                     val element = Element.get(name, id, group, craftCount, false)
                     if (wasCrafted) {
-                        // println("added element $name/$group/$craftCount/$wasCrafted")
                         unlockedIds.put(id)
                         val list = unlockedElements[group]
-                        if (null != list) {
-                            list.add(element)
-                        }
+                        list.add(element)
                     }
                     if (reader.hasRemaining) {
                         val list = IntArrayList()

@@ -39,8 +39,7 @@ open class TextView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attri
             "normal" -> false
             else -> getDefaultIsBold()
         }
-        val xGravity = Gravity.getGravityX(layoutParams.gravity)
-        textAlign = when (xGravity) {
+        textAlign = when (Gravity.getGravityX(layoutParams.gravity)) {
             Gravity.MIN -> Paint.Align.LEFT
             Gravity.CEN -> Paint.Align.CENTER
             Gravity.MAX -> Paint.Align.RIGHT

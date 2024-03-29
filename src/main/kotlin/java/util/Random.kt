@@ -1,22 +1,16 @@
 package java.util
 
 import me.antonio.noack.elementalcommunity.utils.Maths.fract
-import me.antonio.noack.webdroid.Runner.now
+import me.antonio.noack.webdroid.Runner.currentTimeSeconds
 import kotlin.math.sin
 
-class Random(var seed: Long = now().times(541513213L).toLong()){
+class Random(var seed: Long = currentTimeSeconds().times(541513213L).toLong()) {
 
-    fun setSeed(seed: Long){
+    fun setSeed(seed: Long) {
         this.seed = seed
     }
 
-    fun nextFloat(): Float {
-        val nextSeed = seed xor (seed * 13215617L)
-        val value = fract(sin(seed.toInt().toFloat()) * 1516313)
-        seed = nextSeed
-        return value
-    }
-
+    fun nextFloat(): Float = nextDouble().toFloat()
     fun nextDouble(): Double {
         val nextSeed = seed xor (seed * 13215617L)
         val value = fract(sin(seed.toInt().toDouble()) * 1516313)

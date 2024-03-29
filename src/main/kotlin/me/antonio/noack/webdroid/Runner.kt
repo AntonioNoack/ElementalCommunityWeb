@@ -69,12 +69,11 @@ object Runner {
         canvas.restoreToCount(save3)
     }
 
-    fun processEvent(event: Event) {
+    private fun processEvent(event: Event) {
         all.processEvent(event)
     }
 
-    // millis -> seconds
-    fun now() = Date().getTime() * 1e-3
+    fun currentTimeSeconds() = Date().getTime() * 0.001
 
     private var oldInvalid = false
     private var invalidCounter = 0
@@ -128,8 +127,7 @@ object Runner {
                 touches[touch.identifier] = ktTouch
                 processEvent(
                     MotionEvent(
-                        ktTouch.lastX,
-                        ktTouch.lastY,
+                        ktTouch.lastX, ktTouch.lastY,
                         if (touches.size > 1) MotionEvent.ACTION_POINTER_DOWN else MotionEvent.ACTION_DOWN
                     )
                 )
@@ -148,8 +146,7 @@ object Runner {
             for (touch in toRemove) {
                 processEvent(
                     MotionEvent(
-                        touch.lastX,
-                        touch.lastY,
+                        touch.lastX, touch.lastY,
                         if (touches.size > 1) MotionEvent.ACTION_POINTER_UP else MotionEvent.ACTION_UP
                     )
                 )
@@ -162,7 +159,7 @@ object Runner {
     private var currentMouseX = 0f
     private var currentMouseY = 0f
 
-    fun init() {
+    private fun init() {
 
         val width = window.innerWidth
         val height = window.innerHeight
@@ -202,11 +199,17 @@ object Runner {
             true
         }
 
-        canvasElement.onmousemove = { mouseEvent ->
-            updateMouse(mouseEvent)
-            val type = if (mouseButtons == 0) MotionEvent.ACTION_HOVER_MOVE
-            else MotionEvent.ACTION_MOVE
-            processEvent(MotionEvent(currentMouseX, currentMouseY, type))
+        canvasElement.onmousemove = { e ->
+            val prevX = currentMouseX
+            val prevY = currentMouseY
+            updateMouse(e)
+            val event = MotionEvent(
+                currentMouseX, currentMouseY,
+                prevX - currentMouseX, prevY - currentMouseY,
+                if (mouseButtons == 0) MotionEvent.ACTION_HOVER_MOVE
+                else MotionEvent.ACTION_MOVE
+            )
+            processEvent(event)
             true
         }
 
@@ -216,16 +219,17 @@ object Runner {
             true
         }
 
-        canvasElement.onwheel = { it: WheelEvent ->
-            val deltaX = clamp(it.deltaX.toFloat(), -1f, 1f) * 51f
-            val deltaY = clamp(it.deltaY.toFloat(), -1f, 1f) * 51f
-            if (it.shiftKey || it.buttons != 0.toShort()) {
+        canvasElement.onwheel = { we: WheelEvent ->
+            val deltaX = clamp(we.deltaX.toFloat(), -1f, 1f) * 51f
+            val deltaY = clamp(we.deltaY.toFloat(), -1f, 1f) * 51f
+            val event = if (we.shiftKey || we.buttons != 0.toShort()) {
                 // zoom
                 val factor = pow(0.97f, deltaY / 17)
-                processEvent(MotionEvent(currentMouseX, currentMouseY, factor, MotionEvent.ACTION_ZOOM))
+                MotionEvent(currentMouseX, currentMouseY, factor, MotionEvent.ACTION_ZOOM)
             } else {
-                processEvent(MotionEvent(currentMouseX, currentMouseY, deltaX, deltaY, MotionEvent.ACTION_SCROLL))
+                MotionEvent(currentMouseX, currentMouseY, deltaX, deltaY, MotionEvent.ACTION_SCROLL)
             }
+            processEvent(event)
         }
 
         canvasElement.addEventListener("touchstart", { e ->
@@ -261,34 +265,14 @@ object Runner {
             }
         }
 
-        window.onkeyup = {
-            when (it.key.toLowerCase()) {
-                "l" -> {
-                    // layout
-                    println(all.toStringWithVisibleChildren())
-                }
-                "t" -> {
-                    // Toast.makeText(all, "Test", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
         render()
     }
+
+    fun run() {
+        init()
+        Toast.makeText(all, "Get the app in the PlayStore!", Toast.LENGTH_SHORT).show()
+        setTimeout({
+            Toast.makeText(all, "Use mouse wheel + shift to zoom.", Toast.LENGTH_SHORT).show()
+        }, 4000)
+    }
 }
-
-fun main() {
-    Runner.init()
-    Toast.makeText(all, "Get the app in the PlayStore!", Toast.LENGTH_SHORT).show()
-    setTimeout({
-        Toast.makeText(all, "Use mouse wheel + shift to zoom.", Toast.LENGTH_SHORT).show()
-    }, 4000)
-}
-
-// todo needs to be fixed before release:
-//  - scrollbars cannot be dragged
-//  - some centered text isn't centered, e.g. in "Random Suggestion"
-
-// todo remove before release
-//  - debug printing events
-//  - other debug printing?

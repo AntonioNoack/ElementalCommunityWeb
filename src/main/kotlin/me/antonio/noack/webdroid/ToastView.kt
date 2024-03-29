@@ -8,13 +8,13 @@ import android.view.View
 import kotlinx.browser.window
 import me.antonio.noack.elementalcommunity.utils.Maths.mix
 import me.antonio.noack.maths.MathsUtils.spToPx
-import me.antonio.noack.webdroid.Runner.now
+import me.antonio.noack.webdroid.Runner.currentTimeSeconds
 import kotlin.math.abs
 import kotlin.math.max
 
 class ToastView(ctx: Context?, attributeSet: AttributeSet?): View(ctx, attributeSet){
 
-    var lastTime = now()
+    var lastTime = currentTimeSeconds()
     var text = ""
     var time = 0f
     var duration = 10f
@@ -27,7 +27,7 @@ class ToastView(ctx: Context?, attributeSet: AttributeSet?): View(ctx, attribute
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val thisTime = now()
+        val thisTime = currentTimeSeconds()
         time += (thisTime - lastTime).toFloat()
         lastTime = thisTime
 

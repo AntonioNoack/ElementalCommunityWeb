@@ -117,7 +117,6 @@ class AlertDialog(val child: View) : Dialog(child.context, null) {
                     .attr("height", LayoutParams.WRAP_CONTENT)
                     .attr("weight", 1)
                     .setOnClickListener {
-                        println("yes")
                         listener?.invoke(dialog!!, 0)
                         dialog?.dismiss()
                     }
@@ -134,7 +133,6 @@ class AlertDialog(val child: View) : Dialog(child.context, null) {
                     .attr("height", LayoutParams.WRAP_CONTENT)
                     .attr("weight", 1)
                     .setOnClickListener {
-                        println("no")
                         listener?.invoke(dialog!!, 0)
                         dialog?.dismiss()
                     }

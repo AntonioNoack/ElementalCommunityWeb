@@ -133,7 +133,6 @@ class Element constructor(
                     needsSave = true
                 }
                 if (element.group != group) {
-                    // println("group for $name: $group")
                     val newGroup = clamp(group, 0, elementsByGroup.size - 1)
                     elementsByGroup[element.group].remove(element)
                     unlockedElements[element.group].remove(element)

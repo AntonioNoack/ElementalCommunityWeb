@@ -58,7 +58,7 @@ open class ViewGroup(ctx: Context?, attributeSet: AttributeSet?) : View(ctx, att
         }
     }
 
-    private fun showDebugLines(canvas: Canvas, child: View) {
+    /*private fun showDebugLines(canvas: Canvas, child: View) {
         canvas.lineRect(
             child.mLeft + 1,
             child.mTop + 1,
@@ -80,7 +80,7 @@ open class ViewGroup(ctx: Context?, attributeSet: AttributeSet?) : View(ctx, att
             child.mTop + child.measuredHeight,
             0x77ffff00
         )
-    }
+    }*/
 
     /**
      * Ask one of the children of this view to measure itself, taking into
@@ -196,8 +196,6 @@ open class ViewGroup(ctx: Context?, attributeSet: AttributeSet?) : View(ctx, att
             if (child.contains(nx, ny)) {
                 event.x = nx
                 event.y = ny
-                event.dx = ndy
-                event.dy = ndy
                 val result = child.processEvent(event, ox, oy, ndx, ndy)
                 if (result != null) {
                     return result
