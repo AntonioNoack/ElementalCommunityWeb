@@ -5,7 +5,9 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import android.widget.getDefaultSize
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawElement
+import kotlin.math.max
 import kotlin.math.min
 
 class OneElement(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attributeSet) {
@@ -13,21 +15,18 @@ class OneElement(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribut
     var element: Element? = null
     var alphaOverride = 255
 
-    private var calcWidth = 350f
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        when (MeasureSpec.getMode(widthMeasureSpec)) {
-            MeasureSpec.EXACTLY -> {
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-                calcWidth = measuredWidth.toFloat()
-            }
-            MeasureSpec.UNSPECIFIED -> {}
-            MeasureSpec.AT_MOST -> {
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-                calcWidth = min(measuredWidth.toFloat(), calcWidth)
-            }
-        }
-        setMeasuredDimension(calcWidth.toInt(), calcWidth.toInt())
+        val fittingSize = min(
+            MeasureSpec.getSize(widthMeasureSpec),
+            MeasureSpec.getSize(heightMeasureSpec)
+        )
+        val idealSize = max(150, fittingSize)
+        val lp = layoutParams
+        val size = min(
+            getDefaultSize(widthMeasureSpec, idealSize, lp.width),
+            getDefaultSize(heightMeasureSpec, idealSize, lp.height)
+        )
+        setMeasuredDimension(size, size)
     }
 
     private val bgPaint = Paint()
@@ -43,15 +42,16 @@ class OneElement(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribut
         GroupsEtc.tick()
 
         val candidate = element
-        val width = measuredWidth * 1f
+        val w = width.toFloat()
+        val h = height.toFloat()
+        val size = min(w, h)
         bgPaint.alpha = alphaOverride
         textPaint.alpha = alphaOverride
         drawElement(
-            canvas, -1, 0f, 0f, 0f, width, true,
+            canvas, -1, (w - size) * 0.5f, (h - size) * 0.5f, 0f, size, true,
             candidate?.name ?: "???", candidate?.group ?: 15, -1,
             bgPaint, textPaint
         )
-
     }
 
 }

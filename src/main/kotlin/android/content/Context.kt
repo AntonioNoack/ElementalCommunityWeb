@@ -13,9 +13,7 @@ open class Context : FrameLayout(null, null) {
 
     fun getPreferences(mode: Int) = LocalStoragePreferences
 
-    open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-    }
+    open fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {}
 
     fun getSystemService(key: String): Any? {
         when (key) {

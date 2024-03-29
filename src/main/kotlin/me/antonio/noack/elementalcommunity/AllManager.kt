@@ -230,19 +230,9 @@ class AllManager : AppCompatActivity() {
         offlineModeSwitch = findViewById(R.id.offlineModeSwitch)
     }
 
-    private fun goFullScreen() {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            SYSTEM_UI_FLAG_IMMERSIVE or SYSTEM_UI_FLAG_FULLSCREEN or SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        } else {
-            SYSTEM_UI_FLAG_FULLSCREEN or SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        }
-        unlocked?.systemUiVisibility = flags
-        combiner?.systemUiVisibility = flags
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.all)
+        setContentView(R.layout.all_pages)
 
         initViews()
 
@@ -255,8 +245,6 @@ class AllManager : AppCompatActivity() {
                 resources.getColor(R.color.colorPrimary)
             }
         }
-
-        goFullScreen()
 
         unlocked?.all = this
         combiner?.all = this
@@ -759,7 +747,6 @@ class AllManager : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         MusicScheduler.unpause()
-        goFullScreen()
     }
 
     override fun onRequestPermissionsResult(

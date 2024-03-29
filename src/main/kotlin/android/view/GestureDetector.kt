@@ -1,7 +1,6 @@
 package android.view
 
 import android.content.Context
-import me.antonio.noack.webdroid.Runner.now
 import kotlin.math.sqrt
 
 class GestureDetector(val ctx: Context?, val listener: OnGestureListener) {
@@ -26,50 +25,38 @@ class GestureDetector(val ctx: Context?, val listener: OnGestureListener) {
         override fun onSingleTapUp(event: MotionEvent): Boolean = false
     }
 
-    var lastTime = 0.0
-    var motionDistance = 0f
-    var lastX = -1f
-    var lastY = 0f
-    var startTime = 0.0
+    private var motionDistance = 0f
+    private var startTime = 0.0
+    private var isDown = false
 
     fun onTouchEvent(event: MotionEvent?): Boolean {
         event ?: return false
-        lastTime = now()
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 motionDistance = 0f
-                lastX = event.originalX
-                lastY = event.originalY
                 startTime = event.time
+                isDown = true
                 return listener.onDown(event)
             }
-
             MotionEvent.ACTION_MOVE -> {
-                val returnValue = if (lastX > -1f) {
-                    val deltaX = lastX - event.originalX
-                    val deltaY = lastY - event.originalY
-                    motionDistance += sqrt(sq(deltaX, deltaY))
+                if (isDown) {
+                    val deltaX = event.motionDX
+                    val deltaY = event.motionDY
+                    motionDistance += sqrt(deltaX * deltaX + deltaY * deltaY)
                     listener.onScroll(event, event, deltaX, deltaY)
-                } else true
-                lastX = event.originalX
-                lastY = event.originalY
-                return returnValue
+                }
             }
-
             MotionEvent.ACTION_UP -> {
+                isDown = false
                 if (motionDistance < 30f) {
                     if (event.time - startTime > 0.3) listener.onLongPress(event)
                     return listener.onSingleTapUp(event)
                 }
             }
-
             MotionEvent.ACTION_SCROLL -> {
                 listener.onScroll(event, event, event.motionDX, event.motionDY)
             }
         }
         return false
     }
-
-    fun sq(x: Float, y: Float) = x * x + y * y
-
 }

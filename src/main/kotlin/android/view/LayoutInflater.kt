@@ -5,7 +5,7 @@ object LayoutInflater {
     fun inflate(id: View, parent: View, append: Boolean = true): View {
         val view = id.clone()
         if (append) {
-            parent.addChild(view)
+            parent.addView(view)
         }
         return view
     }
@@ -13,7 +13,7 @@ object LayoutInflater {
     fun inflate(id: View, append: Boolean, parent: View) {
         val view = id.clone()
         if (append) {
-            parent.addChild(view)
+            parent.addView(view)
         }
     }
 }

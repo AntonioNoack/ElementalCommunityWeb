@@ -13,10 +13,6 @@ import java.lang.StrictMath.colorWithOpacity
 
 class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attributeSet) {
 
-    // todo add settings, so the user can decide between text field and question field...
-
-    var hint = "..."
-
     companion object {
         var edited: EditText? = null
         val element = (document.createElement("input") as HTMLInputElement)
@@ -31,7 +27,9 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
             }
     }
 
-    fun onChange() {
+    private var hint = "..."
+
+    private fun onChange() {
         if (edited == this) {
             val newText = element.value
             if (newText != text) {
@@ -73,12 +71,9 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
     }
 
     override fun onInit() {
-
         super.onInit()
-
         hint = attributeSet.getString("hint", "...")
         paint.textAlign = Paint.Align.CENTER
-
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -89,14 +84,14 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
         paint.isBold = isBold && !helpOnly
         paint.textSize = textSize
         measuredTextWidth = paint.measureText(text)
-        mMinWidth = measuredWidth + mPaddingLeft + mPaddingRight
-        mMinHeight = textSize.toInt() + mPaddingTop + mPaddingBottom
+        minimumWidth = this.measuredWidth + paddingLeft + paddingRight
+        minimumHeight = textSize.toInt() + paddingTop + paddingBottom
 
         // println("$text @ ${paint.textSize} = $mMinWidth x $mMinHeight")
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
         println(
-            "min: $mMinWidth -> $measuredWidth, $mMinHeight -> $measuredHeight, ${
+            "min: $minimumWidth -> ${this.measuredWidth}, $minimumHeight -> ${this.measuredHeight}, ${
                 MeasureSpec.toString(
                     widthMeasureSpec
                 )
@@ -107,17 +102,16 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
 
     }
 
-    // todo line; left-right padding has no influence on it
     override fun onDraw(canvas: Canvas) {
         drawBackground(canvas)
 
         val pad = dpToPx(5f)
         paint.color = 0xff333333.toInt()
         paint.textSize = textSize
-        val lineY = measuredHeight * .5f + paint.descent() + textSize * 0.5f
-        canvas.drawLine(pad, lineY, measuredWidth - pad, lineY, paint)
+        val lineY = this.measuredHeight * .5f + paint.descent() + textSize * 0.5f
+        canvas.drawLine(pad, lineY, this.measuredWidth - pad, lineY, paint)
 
-        canvas.translate(mPaddingLeft, mPaddingTop)
+        canvas.translate(paddingLeft, paddingTop)
 
         if (text.isBlank()) {
             paint.isBold = false
@@ -134,17 +128,15 @@ class EditText(ctx: Context, attributeSet: AttributeSet?) : TextView(ctx, attrib
         }
 
         if (edited == this) {
-
             element.style.display = ""
             val global = getGlobalPosition()
             element.style.fontSize = "${textSize}px"
             val height = element.offsetHeight
-            element.style.left = "${global.first + mPaddingLeft}px"
+            element.style.left = "${global.x + paddingLeft}px"
             element.style.top =
-                "${global.second + mPaddingTop + (measuredHeight - (mPaddingTop + mPaddingBottom) - height) / 2}px"
+                "${global.y + paddingTop + (this.measuredHeight - (paddingTop + paddingBottom) - height) / 2}px"
 
         }
-
     }
 
     override fun getDefaultTextColor(): Int = 0xff000000.toInt()

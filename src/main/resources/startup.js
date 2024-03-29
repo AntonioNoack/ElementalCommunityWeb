@@ -73,13 +73,6 @@ function askForFile(callback) {
 	input.click()
 }
 
-// todo cancel option
-		/*"error-callback": function(){
-			onError();
-		}*/
-
 window.onerror = function(err,source,line){
     document.getElementById("err").innerText += err+"["+source+":"+line+"]"
 }
-
-console.log(":)")

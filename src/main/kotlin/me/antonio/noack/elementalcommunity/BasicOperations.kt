@@ -156,7 +156,7 @@ object BasicOperations {
         unlockElement: (Element) -> Unit
     ) {
         submit.setOnClickListener {
-            val name = dialog.findViewById<TextView>(R.id.name)!!.text.toString()
+            val name = dialog.findViewById<TextView>(R.id.name)!!.text
             val group = dialog.findViewById<GroupSelectorView>(R.id.colors)!!.selected
             if (group < 0) {
                 AllManager.toast(R.string.please_choose_color, false)

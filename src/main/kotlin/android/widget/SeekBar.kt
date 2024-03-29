@@ -10,7 +10,7 @@ import androidx.core.math.MathUtils.clamp
 import me.antonio.noack.webdroid.Runner.now
 import kotlin.math.round
 
-class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attributeSet){
+class SeekBar(ctx: Context, attributeSet: AttributeSet?) : ProgressBar(ctx, attributeSet) {
 
     interface OnSeekBarChangeListener {
         fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
@@ -19,7 +19,7 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
     }
 
     var listener: OnSeekBarChangeListener? = null
-    fun setOnSeekBarChangeListener(listener: OnSeekBarChangeListener){
+    fun setOnSeekBarChangeListener(listener: OnSeekBarChangeListener) {
         this.listener = listener
     }
 
@@ -28,7 +28,7 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
     var thumb: Drawable? = null
 
     fun makeTransparent(color: Int, opacity: Float = 0.9f): Int {
-        return ((color.shr(24).and(255)*opacity).toInt().shl(24)) or (color.and(0xffffff))
+        return ((color.shr(24).and(255) * opacity).toInt().shl(24)) or (color.and(0xffffff))
     }
 
     override fun onInit() {
@@ -37,11 +37,11 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
         thumb = ColorCircleDrawable(makeTransparent(attributeSet.getInt("thumbTint", -1)))
 
         setOnTouchListener { _, event ->
-            when(event.actionMasked){
+            when (event.actionMasked) {
                 MotionEvent.ACTION_MOVE, MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP -> {
-                    if(event.x.toInt() in mPaddingLeft .. mRight - mPaddingRight){
-                        val progress = clamp(round(min + (event.x - mPaddingLeft - xZero) / xStep).toInt(), min, max)
-                        if(progress != this.progress){
+                    if (event.x.toInt() in paddingLeft..mRight - paddingRight) {
+                        val progress = clamp(round(min + (event.x - paddingLeft - xZero) / xStep).toInt(), min, max)
+                        if (progress != this.progress) {
                             this.progress = progress
                             listener?.onProgressChanged(this, progress, true)
                             lastTime = now()
@@ -66,15 +66,15 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
         super.onDraw(canvas)
         canvas.restoreToCount(save)
 
-        canvas.translate(mPaddingLeft, mPaddingTop)
+        canvas.translate(paddingLeft, paddingTop)
 
         // draw the circle
         // todo give feedback when moving...
 
         val thumb = thumb ?: return
 
-        val width = (getMeasuredWidth() - mPaddingLeft - mPaddingRight).toFloat()
-        val height = (measuredHeight - (mPaddingTop + mPaddingBottom)).toFloat()
+        val width = (getMeasuredWidth() - paddingLeft - paddingRight).toFloat()
+        val height = (this.measuredHeight - (paddingTop + paddingBottom)).toFloat()
         xZero = height * 0.5f
         xStep = (width - 2f * height) / (max - min)
 
@@ -84,32 +84,25 @@ class SeekBar(ctx: Context, attributeSet: AttributeSet?): ProgressBar(ctx, attri
 
         canvas.translate(centerX, centerY)
 
-        // println("$centerX $centerY")
-
-        if(draggedTimer > 0.0){
+        if (draggedTimer > 0.0) {
 
             val thisTime = now()
             val dt = clamp(thisTime - lastTime, 0.0, 0.5)
             lastTime = thisTime
             draggedTimer -= dt * 3
 
-            if(draggedTimer > 0.0){
+            if (draggedTimer > 0.0) {
 
                 // draw the thumb with half the size
                 val half = centerY * 0.5f * draggedTimer.toFloat()
                 thumb.setBounds(-half, -half, half, half)
-                thumb.draw(canvas)
+                thumb.draw(canvas, alpha)
 
                 invalidate()
-
             }
-
         }
 
-        thumb.setBounds( -centerY*.5f, -centerY*.5f,  centerY*.5f, centerY*.5f)
-        thumb.draw(canvas)
-
-
+        thumb.setBounds(-centerY * .5f, -centerY * .5f, centerY * .5f, centerY * .5f)
+        thumb.draw(canvas, alpha)
     }
-
 }

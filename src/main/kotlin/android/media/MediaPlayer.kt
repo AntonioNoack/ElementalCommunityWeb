@@ -6,23 +6,28 @@ import org.w3c.dom.Audio
 class MediaPlayer(val src: String) {
 
     val instance = Audio()
-    var shallPlay = false
     var isLoaded = false
 
     init {
         instance.onerror = { _, _, _, _, _ ->
             println("Media $src error")
         }
+        instance.onload = {
+            isLoaded = true
+            0
+        }
         instance.src = src
     }
 
     fun start() {
-        try {
-            instance.currentTime = 0.0
-            instance.play()
-        } catch (e: Throwable) {
-            println(e)
-        }
+        if (isLoaded) {
+            try {
+                instance.currentTime = 0.0
+                instance.play()
+            } catch (e: Throwable) {
+                println(e)
+            }
+        } else console.log(src, "hasn't been loaded yet")
     }
 
     fun seekTo(seconds: Int) {

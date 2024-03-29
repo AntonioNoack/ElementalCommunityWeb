@@ -9,10 +9,7 @@ import android.view.Window
 open class AppCompatActivity : Context() {
 
     open fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {}
-
-    open fun onCreate(savedInstanceState: Bundle?) {
-
-    }
+    open fun onCreate(savedInstanceState: Bundle?) {}
 
     open fun onBackPressed() {}
     open fun onDestroy() {}

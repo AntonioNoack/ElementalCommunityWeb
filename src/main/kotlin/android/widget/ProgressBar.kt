@@ -30,23 +30,15 @@ open class ProgressBar(ctx: Context, attributeSet: AttributeSet? = null): View(c
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        canvas.translate(mPaddingLeft, mPaddingTop)
-        // todo draw the progress
-        // todo draw the bar
-
-        val y = (getMeasuredHeight() - (mPaddingTop + mPaddingBottom)) * 0.5f
-
+        canvas.translate(paddingLeft, paddingTop)
+        val y = (getMeasuredHeight() - (paddingTop + paddingBottom)) * 0.5f
         paint.strokeWidth = spToPx(2f)
-        canvas.drawLine(mPaddingLeft.toFloat(), y, (getMeasuredWidth() - mPaddingRight).toFloat(), y, paint)
-
-
+        canvas.drawLine(paddingLeft.toFloat(), y, (getMeasuredWidth() - paddingRight).toFloat(), y, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        mMinHeight = spToPx(10f).toInt()
-        mMinWidth = (spToPx(1f) * max).toInt() + mMinHeight
+        minimumHeight = spToPx(10f).toInt()
+        minimumWidth = (spToPx(1f) * max).toInt() + minimumHeight
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
-
 }

@@ -24,7 +24,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        setMeasuredDimension(measuredWidth,  measuredHeight)
+        setMeasuredDimension(this.measuredWidth, this.measuredHeight)
     }
 
     private val random = Random(java.util.System.nanoTime())
@@ -43,7 +43,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
 
         val size = GroupColors.size
 
-        val width = measuredWidth * 1f
+        val width = this.measuredWidth * 1f
         val widthPerNode = width / relativeWidth
 
         val time = sin(java.util.System.nanoTime() * 1e-10).toFloat()
@@ -65,6 +65,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
             drawElement(canvas, -1, widthPerNode*(relativeWidth-1f)/2, 0f, 0f, widthPerNode, true,
                 candidate?.b?.name ?: if(hasNews) "Magic" else if(offline) "No WLAN" else "No WLAN",
                 candidate?.b?.group ?: (noise.getNoise(time, 156+i*1020).times(size).toInt()), -1, bgPaint, textPaint)
+            val middleTextColor = textPaint.color
             drawElement(canvas, -1, widthPerNode*(relativeWidth-1f), 0f, 0f, widthPerNode, true,
                 candidate?.result ?: if(hasNews) "Elements" else if(offline) "Game" else "No Game",
                 candidate?.resultGroup ?: (noise.getNoise(time, 23+i*950).times(size).toInt()), -1, bgPaint, textPaint)
@@ -77,10 +78,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
             canvas.drawText("+", widthPerNode*((relativeWidth-1f)/4 + 0.5f), widthPerNode/2-dy, textPaint)
             canvas.drawText("->", widthPerNode*((relativeWidth-1f)*3/4 + 0.5f), widthPerNode/2-dy, textPaint)
 
-            /*bgPaint.color = bgPaint.color and 0x50ffffff.toInt()
-            canvas.drawRect(0f, 0f, width, widthPerNode, bgPaint)
-            */
-            textPaint.color = 0xff000000.toInt()
+            textPaint.color = middleTextColor
             textPaint.textSize = widthPerNode*.21f
             val dy2 = (textPaint.ascent() + textPaint.descent())/2
             canvas.drawText("${timeString(candidate?.dt ?: (pow(2.0, 1.0 + 20.0 * random.nextDouble())).toInt())} ago ${if((candidate?.w ?: 0) > 0) "liked" else "disliked"}",
@@ -99,7 +97,7 @@ class NewsView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSe
         textPaint.textAlign = Paint.Align.CENTER
         val padding = textPaint.descent()
         val text = "Server: ${WebServices.serverName}"
-        val x0 = min(padding * 3f + 0.5f * textPaint.measureText(text), measuredWidth * 0.5f)
+        val x0 = min(padding * 3f + 0.5f * textPaint.measureText(text), this.measuredWidth * 0.5f)
         val y0 = padding * 2 + 0.5f * (textPaint.textSize - (textPaint.ascent() + textPaint.descent()))
         bgPaint.color = 0xff555555.toInt()
         canvas.drawRect(padding, padding, x0*2-padding, padding*3+textPaint.textSize, bgPaint)

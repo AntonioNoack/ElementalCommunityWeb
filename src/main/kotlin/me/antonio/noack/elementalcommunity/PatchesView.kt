@@ -27,9 +27,7 @@ class PatchesView(context: Context, attributeSet: AttributeSet?) :
         }
 
         val y = calcLayout(originalWidth, margin)
-
         setMeasuredDimension(originalWidth, y)
-
     }
 
     private fun calcLayout(width: Int, margin: Int): Int {
@@ -61,14 +59,4 @@ class PatchesView(context: Context, attributeSet: AttributeSet?) :
         return y
 
     }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-
-        val margin = getMargin()
-        val originalWidth = r - l
-
-        calcLayout(originalWidth, margin)
-
-    }
-
 }

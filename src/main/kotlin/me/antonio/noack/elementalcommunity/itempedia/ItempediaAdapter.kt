@@ -17,7 +17,7 @@ import java.util.*
 class ItempediaAdapter(private val manager: AllManager) :
     RecyclerView.Adapter<ItempediaAdapter.ViewHolder>() {
 
-    class ViewHolder(val view: OneElement) : RecyclerView.ViewHolder(view)
+    class ViewHolder(view: OneElement) : RecyclerView.ViewHolder(view)
 
     var startIndex = 0
     var currentItems: List<Element> = emptyList()
@@ -28,44 +28,49 @@ class ItempediaAdapter(private val manager: AllManager) :
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // present results
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val uuid = position + startIndex
         val index = currentItems.binarySearch { it.uuid.compareTo(uuid) }
+        val view = holder.itemView as OneElement
         if (index >= 0) {
             val element = currentItems[index]
-            holder.view.element = element
-            holder.view.alphaOverride = if (uuid in AllManager.unlockedIds.keys) 255 else HIDDEN_ALPHA
-            holder.view.invalidate()
-            holder.view.setOnClickListener {
+            view.element = element
+            view.alphaOverride = if (uuid in AllManager.unlockedIds.keys) 255 else HIDDEN_ALPHA
+            view.invalidate()
+            view.setOnClickListener {
                 // open menu, where we show more data about the element
                 val dialog = AlertDialog.Builder(manager)
                     .setView(R.layout.itempedia_item)
                     .show()
-                WebServices.askStats(uuid, { stats ->
-                    dialog.findViewById<TextView>(R.id.numRecipes)?.text =
-                        stats.numRecipes.toString()
-                    dialog.findViewById<TextView>(R.id.numIngredients)?.text =
-                        stats.numIngredients.toString()
-                    dialog.findViewById<TextView>(R.id.numSuggestedRecipes)?.text =
-                        stats.numSuggestedRecipes.toString()
-                    dialog.findViewById<TextView>(R.id.numSuggestedIngredients)?.text =
-                        stats.numSuggestedIngredients.toString()
-                    dialog.findViewById<TextView>(R.id.craftingCountAsIngredient)?.text =
-                        stats.numCraftedAsIngredient.toString()
-                })
+                thread {
+                    WebServices.askStats(uuid, { stats ->
+                        manager.runOnUiThread {
+                            dialog.findViewById<TextView>(R.id.numRecipes)?.text =
+                                stats.numRecipes.toString()
+                            dialog.findViewById<TextView>(R.id.numIngredients)?.text =
+                                stats.numIngredients.toString()
+                            dialog.findViewById<TextView>(R.id.numSuggestedRecipes)?.text =
+                                stats.numSuggestedRecipes.toString()
+                            dialog.findViewById<TextView>(R.id.numSuggestedIngredients)?.text =
+                                stats.numSuggestedIngredients.toString()
+                            dialog.findViewById<TextView>(R.id.craftingCountAsIngredient)?.text =
+                                stats.numCraftedAsIngredient.toString()
+                        }
+                    })
+                }
                 dialog.findViewById<OneElement>(R.id.elementView)?.element = element
                 dialog.findViewById<TextView>(R.id.uuid)?.text = "#$uuid"
                 dialog.findViewById<TextView>(R.id.craftingCount)?.text =
                     element.craftingCount.toString()
                 dialog.findViewById<TextView>(R.id.creationDate)?.text =
-                    DateFormat.getDateInstance().format(Date(element.createdDate * 86_400_000L)) // days to millis
+                    DateFormat.getDateInstance()
+                        .format(Date(element.createdDate * 86_400_000L)) // days to millis
                 dialog.findViewById<View>(R.id.back)?.setOnClickListener { dialog.dismiss() }
             }
         } else {
-            holder.view.alphaOverride = HIDDEN_ALPHA
-            holder.view.element = null
-            holder.view.setOnClickListener { }
+            view.alphaOverride = HIDDEN_ALPHA
+            view.element = null
+            view.setOnClickListener { }
         }
     }
 

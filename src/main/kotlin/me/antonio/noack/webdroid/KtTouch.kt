@@ -1,8 +1,8 @@
 package me.antonio.noack.webdroid
 
-class KtTouch(val id: dynamic, var targetX: Float, var targetY: Float){
-    var currentX = targetX
-    var currentY = targetY
+class KtTouch(val id: dynamic, var lastX: Float, var lastY: Float) {
+    var currentX = lastX
+    var currentY = lastY
     var isValid = false
-    override fun toString(): String = "[$currentX -> $targetX]"
+    override fun toString(): String = "[$currentX -> $lastX]"
 }

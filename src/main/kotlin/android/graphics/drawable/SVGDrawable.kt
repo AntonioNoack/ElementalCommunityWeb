@@ -1,8 +1,7 @@
 package android.graphics.drawable
 
 import android.graphics.Canvas
-import kotlinx.browser.document
-import org.w3c.dom.HTMLImageElement
+import org.w3c.dom.Image
 
 external fun btoa(string: String): String
 
@@ -21,7 +20,7 @@ class SVGDrawable(source: String) : Drawable() {
     </vector>
      */
 
-    val image = document.createElement("img") as HTMLImageElement
+    private val image = Image()
 
     init {
         image.onload = {
@@ -36,7 +35,7 @@ class SVGDrawable(source: String) : Drawable() {
 
     override fun getMinimumHeight(): Int = 0
     override fun getMinimumWidth(): Int = 0
-    override fun draw(canvas: Canvas) {
+    override fun draw(canvas: Canvas, alpha: Float) {
         if (image.complete && image.naturalWidth != 0) {
             canvas.ctx.drawImage(
                 image,

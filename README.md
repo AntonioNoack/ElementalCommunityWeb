@@ -1,2 +1,2 @@
 # ElementalCommunityWeb
-Web Edition of Elemental Community (front end only)
+Web Edition of Elemental Community (frontend only)

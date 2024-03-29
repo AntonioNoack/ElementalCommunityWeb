@@ -9,9 +9,8 @@ import android.view.Gravity
 import android.view.View
 import me.antonio.noack.maths.MathsUtils.dpToPx
 import me.antonio.noack.maths.MathsUtils.spToPx
-import org.w3c.dom.HTMLElement
 
-open class TextView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attributeSet){
+open class TextView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attributeSet) {
 
     var text = ""
     var paint = Paint()
@@ -23,17 +22,11 @@ open class TextView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attrib
     val watchers = ArrayList<TextWatcher>()
 
     override fun toString(): String {
-        return super.toString()+"($text)"
+        return super.toString() + "($text)"
     }
 
     init {
-
         paint.textAlign = Paint.Align.CENTER
-
-        setOnClickListener {
-            println("ignored click on $this")
-        }
-
     }
 
     override fun onInit() {
@@ -41,77 +34,71 @@ open class TextView(ctx: Context, attributeSet: AttributeSet?): View(ctx, attrib
         text = attributeSet.getString("text", "")
         textSize = attributeSet.getFloat("textSize", getDefaultTextSize())
         textColor = attributeSet.getInt("textColor", getDefaultTextColor())
-        isBold = when(attributeSet.getString("textStyle", "")){
+        isBold = when (attributeSet.getString("textStyle", "")) {
             "bold" -> true
             "normal" -> false
             else -> getDefaultIsBold()
         }
-        val xGravity = layoutParams.gravity and Gravity.HORIZONTAL_GRAVITY_MASK
-        textAlign =
-        when(xGravity){
-            Gravity.LEFT and Gravity.HORIZONTAL_GRAVITY_MASK -> Paint.Align.LEFT
-            Gravity.CENTER and Gravity.HORIZONTAL_GRAVITY_MASK -> Paint.Align.CENTER
-            Gravity.RIGHT and Gravity.HORIZONTAL_GRAVITY_MASK -> Paint.Align.RIGHT
+        val xGravity = Gravity.getGravityX(layoutParams.gravity)
+        textAlign = when (xGravity) {
+            Gravity.MIN -> Paint.Align.LEFT
+            Gravity.CEN -> Paint.Align.CENTER
+            Gravity.MAX -> Paint.Align.RIGHT
             else -> {
-                when(attributeSet.getString("textAlignment", "")){
-                    "left", "start" ->  Paint.Align.LEFT
-                    "center" ->  Paint.Align.CENTER
-                    "right", "end" ->  Paint.Align.RIGHT
+                when (attributeSet.getString("textAlignment", "")) {
+                    "left", "start" -> Paint.Align.LEFT
+                    "center" -> Paint.Align.CENTER
+                    "right", "end" -> Paint.Align.RIGHT
                     else -> getDefaultTextAlign()
                 }
             }
         }
-        // println("text $text := ${attributeSet.getString("textSize", "")}")
-        // println("tv $text ${layoutParams.gravity} $xGravity, ${Gravity.LEFT} ${Gravity.CENTER} ${Gravity.RIGHT} -> $textAlign")
     }
 
-    open fun addTextChangedListener(watcher: TextWatcher){
+    open fun addTextChangedListener(watcher: TextWatcher) {
         watchers.add(watcher)
     }
 
     var measuredTextWidth = 0f
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-
-        if(this::class.simpleName != "EditText"){
-            if(text.isNotBlank()){
-                paint.isBold = isBold
-                paint.textSize = textSize
-                measuredTextWidth = paint.measureText(text)
-                mMinWidth = measuredTextWidth.toInt() + mPaddingLeft + mPaddingRight
-                mMinHeight = paint.textSize.toInt() + mPaddingTop + mPaddingBottom
-            } else {
-                measuredTextWidth = 0f
-                mMinWidth = mPaddingLeft + mPaddingRight
-                mMinHeight = mPaddingTop + mPaddingBottom
-            }
+        if (this !is EditText) {
+            paint.isBold = isBold
+            paint.textSize = textSize
+            measuredTextWidth = paint.measureText(text)
+            minimumWidth = measuredTextWidth.toInt() + paddingX
+            minimumHeight = paint.textSize.toInt() + paddingY
         }
-
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.translate(mPaddingLeft, mPaddingTop)
+        canvas.translate(paddingLeft, paddingTop)
 
         paint.isBold = isBold
         paint.textSize = textSize
         paint.color = textColor
+        paint.alpha = (alpha * 255).toInt()
 
         drawText(canvas, text, textAlign)
     }
 
-    fun drawText(canvas: Canvas, text: String, align: Paint.Align, dx: Float = 0f, dy: Float = 0f,
-                 width: Int = measuredWidth - (mPaddingLeft + mPaddingRight),
-                 height: Int = measuredHeight - (mPaddingTop + mPaddingBottom),
-                 paint: Paint = this.paint) =
-            drawText(canvas, text, align, dx, dy, width.toFloat(), height.toFloat(), paint)
+    fun drawText(
+        canvas: Canvas, text: String, align: Paint.Align, dx: Float = 0f, dy: Float = 0f,
+        width: Int = this.measuredWidth - (paddingLeft + paddingRight),
+        height: Int = this.measuredHeight - (paddingTop + paddingBottom),
+        paint: Paint = this.paint
+    ) = drawText(canvas, text, align, dx, dy, width.toFloat(), height.toFloat(), paint)
 
-    fun drawText(canvas: Canvas, text: String, align: Paint.Align, dx: Float, dy: Float, width: Float, height: Float, paint: Paint){
-        if(text.isBlank()) return
-        val centerX = when(align){
+    fun drawText(
+        canvas: Canvas, text: String, align: Paint.Align,
+        dx: Float, dy: Float, width: Float, height: Float,
+        paint: Paint
+    ) {
+        if (text.isBlank()) return
+        val centerX = when (align) {
             Paint.Align.LEFT -> {
                 measuredTextWidth * 0.5f
             }

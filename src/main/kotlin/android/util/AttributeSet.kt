@@ -53,7 +53,9 @@ class AttributeSet(val element: Element? = null) {
     fun getDrawable(key: String, default: Drawable?): Drawable? {
         val value = values[key] ?: return default
         val toInt = value.toIntOrNull()
-        if (toInt != null) return ColorDrawable(toInt)
+        if (toInt != null) {
+            return ColorDrawable(toInt)
+        }
         val svg = value.trim()
         return when {
             svg.startsWith("<") -> SVGDrawable(svg)
