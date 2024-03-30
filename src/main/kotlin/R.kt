@@ -797,27 +797,11 @@ object R {
                                 .attr("textColor", 0x7f6fffff)
                         )
                         .addView(
-                            LinearLayout(all, null)
-                                .attr("layout_width", "match_parent")
-                                .attr("layout_height", "wrap_content")
-                                .addView(
-                                    Space(all, null)
-                                        .attr("layout_width", "0dp")
-                                        .attr("layout_height", "1dp")
-                                        .attr("layout_weight", "1")
-                                )
-                                .addView(
-                                    me.antonio.noack.elementalcommunity.OneElement(all, null)
-                                        .attr("layout_width", "200dp")
-                                        .attr("id", "elementView")
-                                        .attr("layout_height", "200dp")
-                                )
-                                .addView(
-                                    Space(all, null)
-                                        .attr("layout_width", "0dp")
-                                        .attr("layout_height", "1dp")
-                                        .attr("layout_weight", "1")
-                                )
+                            me.antonio.noack.elementalcommunity.OneElement(all, null)
+                                .attr("layout_width", "200dp")
+                                .attr("id", "elementView")
+                                .attr("layout_height", "200dp")
+                                .attr("gravity", "center")
                         )
                         .addView(
                             LinearLayout(all, null)

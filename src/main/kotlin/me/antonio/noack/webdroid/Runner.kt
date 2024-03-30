@@ -268,6 +268,16 @@ object Runner {
         render()
     }
 
+    // todo critical bug:
+    //  scrolling is broken on phone
+    //  nothing is animating while holding down -> performance THAT bad?
+
+    // todo bug:
+    //  some LinearLayouts are too big, I think: pages list can be scrolled too far,
+    //  and elements lists go down a little to far, too
+    // todo bug:
+    //  center OneElement in statistics
+
     fun run() {
         init()
         Toast.makeText(all, "Get the app in the PlayStore!", Toast.LENGTH_SHORT).show()

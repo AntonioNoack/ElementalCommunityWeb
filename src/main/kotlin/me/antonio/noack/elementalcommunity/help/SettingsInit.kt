@@ -258,8 +258,6 @@ object SettingsInit {
                 spendDiamonds(if (Maths.random() < 0.1) -250 else 15)
                 true
             }
-
-
         }
     }
 
@@ -450,17 +448,14 @@ object SettingsInit {
     }
 
     /**
-     * not that secure, however it's meant for shared password only anyways;
+     * not that secure, however it's meant for shared password only anyway;
      * because the server side is not secure for handling server instances, either
      * */
-    fun hashPassword(pass: String): Long {
+    private fun hashPassword(pass: String): Long {
         val seed = pass.hashCode().toLong()
         val big = BigInteger(seed.toString())
         val prime = BigInteger("51163516513147")
         val pow = big.modPow(prime, BigInteger("2").pow(64).minus(BigInteger("1")))
-        return pow.toLong().toLong2() and 0x7fffffffffffffffL
+        return pow.toLong().toLong() and 0x7fffffffffffffffL
     }
-
-    fun String.toLong2() = toLong()
-
 }

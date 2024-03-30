@@ -1,9 +1,6 @@
 package me.antonio.noack.elementalcommunity.utils
 
-import java.util.*
-
 object Compact {
-
     fun compacted(name: String): String {
         var text = name
         if(text.startsWith("the ", true)){
@@ -13,5 +10,4 @@ object Compact {
             .replace(";", "")
             .replace(" ", "")
     }
-
 }

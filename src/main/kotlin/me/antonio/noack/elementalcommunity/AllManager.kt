@@ -4,7 +4,6 @@ import R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -235,16 +234,6 @@ class AllManager : AppCompatActivity() {
         setContentView(R.layout.all_pages)
 
         initViews()
-
-        actionBar?.hide()
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            window.navigationBarColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                resources.getColor(R.color.colorPrimary, theme)
-            } else {
-                resources.getColor(R.color.colorPrimary)
-            }
-        }
 
         unlocked?.all = this
         combiner?.all = this
@@ -740,20 +729,4 @@ class AllManager : AppCompatActivity() {
         super.onResume()
         MusicScheduler.unpause()
     }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            SaveLoadLogic.WRITE_EXT_STORAGE_CODE -> {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    SaveLoadLogic.onWriteAllowed?.invoke()
-                }
-            }
-        }
-    }
-
 }

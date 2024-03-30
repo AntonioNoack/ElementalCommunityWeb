@@ -95,16 +95,15 @@ class TreeSet<V : Comparable<V>> : MutableSet<V> {
         }
     }
 
-    fun equals(o: Any): Boolean {
-        if (o === this)
+    override fun equals(other: Any?): Boolean {
+        if (other === this)
             return true
-
-        if (o !is Set<*>)
+        if (other !is Set<*>)
             return false
-        if (o.size != size)
+        if (other.size != size)
             return false
         return try {
-            containsAll(o)
+            containsAll(other)
         } catch (unused: ClassCastException) {
             false
         } catch (unused: NullPointerException) {
