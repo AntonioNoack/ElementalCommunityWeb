@@ -1,8 +1,6 @@
 package me.antonio.noack.elementalcommunity
 
-import java.util.concurrent.ConcurrentHashMap
-
-class ConcurrentHashSet<V>(capacity: Int) : ConcurrentHashMap<V, Unit>(capacity) {
+class ConcurrentHashSet<V>(capacity: Int) : HashMap<V, Unit>(capacity) {
 
     fun put(element: V) {
         this[element] = Unit

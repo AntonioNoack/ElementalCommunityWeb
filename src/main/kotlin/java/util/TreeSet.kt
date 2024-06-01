@@ -98,9 +98,7 @@ class TreeSet<V : Comparable<V>> : MutableSet<V> {
     override fun equals(other: Any?): Boolean {
         if (other === this)
             return true
-        if (other !is Set<*>)
-            return false
-        if (other.size != size)
+        if (other !is Set<*> || other.size != size)
             return false
         return try {
             containsAll(other)

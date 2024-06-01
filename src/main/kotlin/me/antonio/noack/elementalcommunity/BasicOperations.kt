@@ -1,20 +1,17 @@
 package me.antonio.noack.elementalcommunity
 
-import R
 import android.app.Dialog
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import me.antonio.noack.elementalcommunity.api.WebServices
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 
 object BasicOperations {
 
-    val todo = AtomicInteger(0)
-    val done = AtomicInteger(0)
+    var todo = 0
+    var done = 0
 
     fun onRecipeRequest(
         first: Element,
@@ -25,37 +22,33 @@ object BasicOperations {
         unlockElement: (Element) -> Unit,
         add: (Element) -> Unit
     ) {
-        todo.incrementAndGet()
-        thread(true) {
-            WebServices.askRecipe(first, second, all, { result ->
-                done.incrementAndGet()
-                when {
-                    result != null -> unlockElement(result)
-                    AllManager.offlineMode || AllManager.askFrequency.isTrue() -> {
-                        // staticRunOnUIThread { AllManager.askingSound.play() }
-                        askForCandidates(
-                            first, second, all,
-                            measuredWidth,
-                            measuredHeight,
-                            unlockElement
-                        ) {
-                            WebServices.askRecipe(first, second, all, { result2 ->
-                                if (result2 != null) {// remove in the future, when the least amount of support is 2 or sth like that
-                                    AllManager.unlockedIds.put(result2.uuid)
-                                    AllManager.saveElement2(result2)
-                                    add(result2)
-                                }
-                            }, {})
-                        }
+        todo++
+        WebServices.askRecipe(first, second, all, { result ->
+            done++
+            when {
+                result != null -> unlockElement(result)
+                AllManager.offlineMode || AllManager.askFrequency.isTrue() -> {
+                    askForCandidates(
+                        first, second, all,
+                        measuredWidth,
+                        measuredHeight,
+                        unlockElement
+                    ) {
+                        WebServices.askRecipe(first, second, all, { result2 ->
+                            if (result2 != null) {// remove in the future, when the least amount of support is 2 or sth like that
+                                AllManager.unlockedIds.put(result2.uuid)
+                                AllManager.saveElement2(result2)
+                                add(result2)
+                            }
+                        }, {})
                     }
-
-                    else -> AllManager.toast(R.string.no_result_found, false)
                 }
-            }, {
-                done.incrementAndGet()
-                AllManager.toast("${it::class.simpleName}: ${it.message}", true)
-            })
-        }
+                else -> AllManager.toast(R.string.no_result_found, false)
+            }
+        }, {
+            done++
+            AllManager.toast("${it::class.simpleName}: ${it.message}", true)
+        })
     }
 
     fun askForCandidates(
@@ -68,10 +61,9 @@ object BasicOperations {
         onSuccess: () -> Unit
     ) {
         // ask for recipe to add :)
-        todo.incrementAndGet()
+        todo++
         WebServices.getCandidates(a, b, { candidates ->
-            done.incrementAndGet()
-
+            done++
             val dialog: Dialog = AlertDialog.Builder(all)
                 .setView(R.layout.add_recipe)
                 .show()
@@ -141,7 +133,7 @@ object BasicOperations {
                 }
             }
         }, {
-            done.incrementAndGet()
+            done++
             AllManager.toast("${it::class.simpleName}: ${it.message}", true)
         })
     }
@@ -156,7 +148,7 @@ object BasicOperations {
         unlockElement: (Element) -> Unit
     ) {
         submit.setOnClickListener {
-            val name = dialog.findViewById<TextView>(R.id.name)!!.text
+            val name = dialog.findViewById<TextView>(R.id.name)!!.text.toString()
             val group = dialog.findViewById<GroupSelectorView>(R.id.colors)!!.selected
             if (group < 0) {
                 AllManager.toast(R.string.please_choose_color, false)
@@ -172,11 +164,11 @@ object BasicOperations {
                     return@setOnClickListener
                 }
             }
-            todo.incrementAndGet()
+            todo++
             WebServices.suggestRecipe(
                 all, getComponentA(), getComponentB(), name, group,
                 { line ->
-                    done.incrementAndGet()
+                    done++
                     AllManager.toast(R.string.sent, false)
                     if (allowingDismiss) {
                         try {
@@ -198,15 +190,13 @@ object BasicOperations {
                             // removed, because it's rather expensive to compute and not that important
                             // maybe we should save that information on per-instance basis in the database...
                             val rCraftingCount = -1
-                            val element =
-                                Element.get(rName, rUUID, rGroup, rCraftingCount, true)
-                            unlockElement(element)
+                            unlockElement(Element.get(rName, rUUID, rGroup, rCraftingCount, true))
                         } catch (_: NumberFormatException) {
 
                         }
                     }
                 },
-                { done.incrementAndGet() })
+                { done++ })
         }
     }
 

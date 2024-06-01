@@ -1,6 +1,5 @@
 package me.antonio.noack.elementalcommunity
 
-import java.util.*
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -8,6 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import me.antonio.noack.elementalcommunity.utils.Maths.fract
 import me.antonio.noack.webdroid.setTimeout
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -15,7 +15,7 @@ class LoadingBarView(context: Context, attributeSet: AttributeSet?) : View(conte
 
     val paint = Paint()
 
-    private var lastTime = java.util.System.nanoTime()
+    private var lastTime = System.nanoTime()
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
@@ -23,14 +23,14 @@ class LoadingBarView(context: Context, attributeSet: AttributeSet?) : View(conte
         val width = width
         val height = height
 
-        val thisTime = java.util.System.nanoTime()
+        val thisTime = System.nanoTime()
         val deltaTime = min(0.1, (thisTime - lastTime) * 1e-9)
         lastTime = thisTime
 
         val lastProgress = progress
 
-        val done = BasicOperations.done.get()
-        val todo = BasicOperations.todo.get()
+        val done = BasicOperations.done
+        val todo = BasicOperations.todo
 
         val target = if (todo == done) done + 0.1 else done + 0.5
         progress = max(progress, target - 5f)
@@ -58,9 +58,7 @@ class LoadingBarView(context: Context, attributeSet: AttributeSet?) : View(conte
         }
 
         if (progress != lastProgress || todo != done) invalidate()
-        else {
-            setTimeout(::postInvalidate, 200)
-        }
+        else setTimeout(::postInvalidate, 200)
 
     }
 

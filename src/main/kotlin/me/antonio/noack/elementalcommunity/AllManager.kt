@@ -1,10 +1,8 @@
 package me.antonio.noack.elementalcommunity
 
 import R
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,7 +10,6 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.antonio.noack.elementalcommunity.GroupsEtc.GroupColors
@@ -26,21 +23,21 @@ import me.antonio.noack.elementalcommunity.help.SettingsInit
 import me.antonio.noack.elementalcommunity.io.SaveLoadLogic
 import me.antonio.noack.elementalcommunity.io.SplitReader2
 import me.antonio.noack.elementalcommunity.itempedia.ItempediaAdapter
-import me.antonio.noack.elementalcommunity.itempedia.ItempediaAdapter.Companion.ITEMS_PER_PAGE
+import me.antonio.noack.elementalcommunity.itempedia.ItempediaPageLoader.createItempediaPages
+import me.antonio.noack.elementalcommunity.itempedia.ItempediaPageLoader.loadNumPages
+import me.antonio.noack.elementalcommunity.itempedia.ItempediaSearch
 import me.antonio.noack.elementalcommunity.itempedia.ItempediaSwipeDetector
 import me.antonio.noack.elementalcommunity.mandala.MandalaView
 import me.antonio.noack.elementalcommunity.tree.TreeView
 import me.antonio.noack.elementalcommunity.utils.IntArrayList
+import me.antonio.noack.webdroid.setTimeout
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 
 // Sounds:
 // magic: https://freesound.org/people/suntemple/sounds/241809/
 // ok: https://freesound.org/people/grunz/sounds/109663/
 // click: https://freesound.org/people/vitriolix/sounds/706/
-
-// todo does offline mode work with synchronizing/loading-saving your progress via a file / the server?
 
 class AllManager : AppCompatActivity() {
 
@@ -54,10 +51,12 @@ class AllManager : AppCompatActivity() {
         val unlockedIds = ConcurrentHashSet<Int>(512)
 
         init {
-            for (i in 1..4) unlockedIds.put(i)
+            for (i in 1..4) {
+                unlockedIds.put(i)
+            }
         }
 
-        val elementById = ConcurrentHashMap<Int, Element>(512)
+        val elementById = HashMap<Int, Element>(512)
 
         val elementsByGroup = Array(GroupColors.size + 12) {
             TreeSet<Element>()
@@ -71,21 +70,23 @@ class AllManager : AppCompatActivity() {
         var FAVOURITE_COUNT = 5
         var favourites = arrayOfNulls<Element>(FAVOURITE_COUNT)
 
-        val elementByRecipe = ConcurrentHashMap<Pair<Element, Element>, Element>(2048)
-        val recipesByElement = ConcurrentHashMap<Element, MutableList<Pair<Element, Element>>>(2048)
+        val elementByRecipe = HashMap<Pair<Element, Element>, Element>(2048)
+        val recipesByElement = HashMap<Element, MutableList<Pair<Element, Element>>>(2048)
 
-        val elementByName = ConcurrentHashMap<String, Element>(2048)
+        val elementByName = HashMap<String, Element>(2048)
 
         fun registerBaseElements(pref: SharedPreferences?) {
-            val names = arrayOf("???", "Earth", "Air", "Water", "Fire")
-            val groups = intArrayOf(20, 5, 12, 20, 4)
-            for (id in unlockedIds.keys) {// after a restart, this should be only 4
-                val defName = names.getOrNull(id) ?: ""
-                val defGroup = groups.getOrNull(id) ?: 0
+            // how TF is this taking 100ms????
+            val names = arrayOf("Earth", "Air", "Water", "Fire")
+            val groups = intArrayOf(5, 12, 20, 4)
+            for (index in 0 until 4) {// after a restart, this should be only 4
+                val id = index + 1
+                val defName = names[index]
+                val defGroup = groups[index]
                 val name = pref?.getString("$id.name", defName) ?: defName
                 val group = pref?.getInt("$id.group", defGroup) ?: defGroup
                 val craftingCount = pref?.getInt("$id.crafted", -1) ?: -1
-                val element = Element.get(name, id, group, craftingCount, false)
+                val element = elementById.getOrPut(id) { Element(name, id, group, craftingCount) }
                 unlockedElements[element.group].add(element)
             }
         }
@@ -99,14 +100,16 @@ class AllManager : AppCompatActivity() {
             val list = recipesByElement[r]
             if (list == null) {
                 recipesByElement[r] = arrayListOf(a to b)
-            } else {
+            } else synchronized(list) {
                 if (pair !in list) {
                     list.add(pair)
                 }
             }
-            invalidate()
-            all?.updateDiamondCount()
-            if (save) saveElement2(r)
+            if (save) {
+                invalidate()
+                all?.updateDiamondCount()
+                saveElement2(r)
+            }
         }
 
         fun getRecipe(a: Element, b: Element): Element? {
@@ -127,10 +130,10 @@ class AllManager : AppCompatActivity() {
 
         lateinit var invalidate: () -> Unit
 
-        lateinit var successSound: Sound
-        lateinit var okSound: Sound
-        lateinit var clickSound: Sound
-        lateinit var backgroundMusic: List<Sound>
+        var successSound: Sound? = null
+        var okSound: Sound? = null
+        var clickSound: Sound? = null
+        var backgroundMusic: List<Sound> = emptyList()
 
         var askFrequency = AskFrequencyOption.ALWAYS
         var backgroundMusicVolume = 1f
@@ -139,35 +142,40 @@ class AllManager : AppCompatActivity() {
         const val diamondWatchKey = "diamondCountWatched"
         const val diamondSpentKey = "diamondCountSpent"
 
+        fun checkIsUIThread() {
+        }
+
     }
 
     lateinit var pref: SharedPreferences
     var combiner: Combiner? = null
     var unlocked: UnlockedRows? = null
-    var startButton: View? = null
+    private var startButton: View? = null
     var flipper: ViewFlipper? = null
-    var treeViewButton: View? = null
-    var graphViewButton: View? = null
-    var mandalaViewButton: View? = null
-    var itempediaViewButton: View? = null
-    var suggestButton: View? = null
+    private var treeViewButton: View? = null
+    private var graphViewButton: View? = null
+    private var mandalaViewButton: View? = null
+    private var itempediaViewButton: View? = null
+    private var suggestButton: View? = null
     var settingButton: View? = null
-    var back1: View? = null
-    var back2: View? = null
-    var back3: View? = null
-    var backArrow1: View? = null
-    var backArrow2: View? = null
-    var backArrow3: View? = null
-    var backArrow4: View? = null
-    var backArrow5: View? = null
-    var backArrow6: View? = null
+    private var back1: View? = null
+    private var back2: View? = null
+    private var back3: View? = null
+    private var backArrow1: View? = null
+    private var backArrow2: View? = null
+    private var backArrow3: View? = null
+    private var backArrow4: View? = null
+    private var backArrow5: View? = null
+    private var backArrow6: View? = null
     var favTitle: TextView? = null
     var favSlider: SeekBar? = null
-    var search1: EditText? = null
-    var search2: EditText? = null
-    var searchButton1: View? = null
-    var searchButton2: View? = null
-    var randomButton: View? = null
+    private var search1: EditText? = null
+    private var search2: EditText? = null
+    var search3: EditText? = null
+    private var searchButton1: View? = null
+    private var searchButton2: View? = null
+    var searchButton3: View? = null
+    private var randomButton: View? = null
     var resetEverythingButton: View? = null
     var newsView: NewsView? = null
     var freqSlider: SeekBar? = null
@@ -180,7 +188,7 @@ class AllManager : AppCompatActivity() {
     var volumeTitle: TextView? = null
 
     var treeView: TreeView? = null
-    var graphView: GraphView? = null
+    private var graphView: GraphView? = null
     var spaceSlider: SeekBar? = null
     var mandalaView: MandalaView? = null
 
@@ -213,8 +221,10 @@ class AllManager : AppCompatActivity() {
         backArrow6 = findViewById(R.id.backArrow6)
         search1 = findViewById(R.id.search1)
         search2 = findViewById(R.id.search2)
+        search3 = findViewById(R.id.search3)
         searchButton1 = findViewById(R.id.searchButton1)
         searchButton2 = findViewById(R.id.searchButton2)
+        searchButton3 = findViewById(R.id.searchButton3)
         randomButton = findViewById(R.id.randomButton)
         spaceSlider = findViewById(R.id.spaceSlider)
         resetEverythingButton = findViewById(R.id.resetEverythingButton)
@@ -229,11 +239,37 @@ class AllManager : AppCompatActivity() {
         offlineModeSwitch = findViewById(R.id.offlineModeSwitch)
     }
 
+    private fun goFullScreen() {
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val clock = Clock()
+
         super.onCreate(savedInstanceState)
+        clock.stop("super.onCreate")
+
         setContentView(R.layout.all_pages)
+        clock.stop("Set Layout")
 
         initViews()
+
+        clock.stop("Init Views")
+
+        // actionBar?.hide()
+
+        /*if (Build.VERSION.SDK_INT >= 21) {
+            window.navigationBarColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                resources.getColor(R.color.colorPrimary, theme)
+            } else {
+                @Suppress("DEPRECATION")
+                resources.getColor(R.color.colorPrimary)
+            }
+        }*/
+
+        goFullScreen()
+
+        clock.stop("Fullscreen")
 
         unlocked?.all = this
         combiner?.all = this
@@ -241,40 +277,48 @@ class AllManager : AppCompatActivity() {
         graphView?.all = this
         mandalaView?.all = this
 
-        successSound = Sound(R.raw.magic, this)
-        okSound = Sound(R.raw.ok, this)
-        clickSound = Sound(R.raw.click, this)
-        backgroundMusic = listOf(
-            Sound(R.raw.music_aquatic_omniverse, this),
-            Sound(R.raw.music_clouds_make2, this),
-            Sound(R.raw.music_infinite_elements, this)
-        )
-        // askingSound = So
+        setTimeout({
+            val clock1 = Clock()
+            successSound = Sound(R.raw.magic, this)
+            okSound = Sound(R.raw.ok, this)
+            clickSound = Sound(R.raw.click, this)
+            backgroundMusic = listOf(
+                Sound(R.raw.music_aquatic_omniverse, this),
+                Sound(R.raw.music_clouds_make2, this),
+                Sound(R.raw.music_infinite_elements, this)
+            )
+            clock1.stop("Sounds Async")
+        }, 0)
 
         staticRunOnUIThread = { callback ->
             MusicScheduler.tick()
-            try {
-                callback()
-            } catch (e: Exception) {
-                staticToast1(e.message.toString(), true)
+            runOnUiThread {
+                try {
+                    callback()
+                } catch (e: Exception) {
+                    staticToast1(e.message.toString(), true)
+                }
             }
         }
 
         staticToast1 = { msg, isLong ->
             MusicScheduler.tick()
-            Toast.makeText(
-                this,
-                msg,
-                if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-            ).show()
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    msg,
+                    if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+                ).show()
+            }
         }
         staticToast2 = { msg, isLong ->
             MusicScheduler.tick()
-            Toast.makeText(
-                this,
-                msg,
-                if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-            ).show()
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    msg, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+                ).show()
+            }
         }
         invalidate = {
             MusicScheduler.tick()
@@ -288,7 +332,6 @@ class AllManager : AppCompatActivity() {
             treeView?.postInvalidate()
             mandalaView?.isInvalidated = true
             mandalaView?.postInvalidate()
-
         }
 
         pref = BetterPreferences(getPreferences(Context.MODE_PRIVATE))
@@ -297,9 +340,14 @@ class AllManager : AppCompatActivity() {
         }
 
         addClickListeners()
+
+        clock.stop("Added click listeners")
+
         loadEverythingFromPreferences()
 
         MusicScheduler.tick()
+
+        clock.total("Total")
 
     }
 
@@ -315,76 +363,12 @@ class AllManager : AppCompatActivity() {
         itempediaAdapter = ItempediaAdapter(this)
         rec.adapter = itempediaAdapter
         rec.addOnItemTouchListener(ItempediaSwipeDetector(this))
-        loadNumPages()
-        createItempediaPages(10)
+        loadNumPages(this)
+        createItempediaPages(this, 10)
     }
 
-    private lateinit var itempediaAdapter: ItempediaAdapter
+    lateinit var itempediaAdapter: ItempediaAdapter
     var deltaItempediaPage: (Int) -> Unit = {}
-
-    @SuppressLint("SetTextI18n")
-    private fun createItempediaPages(numElements: Int) {
-        val pageList = findViewById<LinearLayout>(R.id.pageFlipper)!!
-        pageList.removeAllViews()
-        val numPages = (numElements + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE
-        val views = ArrayList<TextView>()
-        var previouslyClicked = 0
-        fun openPage(i: Int) {
-            val view = views[i]
-            views[previouslyClicked].alpha = 0.7f
-            view.alpha = 1f
-            previouslyClicked = i
-            loadItempediaPage(i)
-        }
-
-        val layoutInflater = layoutInflater
-        for (i in 0 until numPages) {
-            layoutInflater.inflate(R.layout.itempedia_page, pageList)
-            val view = pageList.getChildAt(pageList.childCount - 1) as TextView
-            view.text = "${i + 1}"
-            view.alpha = if (i == 0) 1f else 0.7f
-            view.setOnClickListener {
-                openPage(i)
-            }
-            views.add(view)
-        }
-        deltaItempediaPage = { delta ->
-            openPage(clamp(previouslyClicked + delta, 0, numPages - 1))
-        }
-    }
-
-    private fun loadNumPages() {
-        WebServices.askPage(-1, { _, maxUUID ->
-            createItempediaPages(maxUUID)
-        })
-        loadItempediaPage(0)
-    }
-
-    private var lastItempediaPage = -1
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun loadItempediaPage(pageIndex: Int) {
-        if (pageIndex == lastItempediaPage) return
-        lastItempediaPage = pageIndex
-        BasicOperations.todo.incrementAndGet()
-        val lazyDone = lazy {
-            BasicOperations.done.incrementAndGet()
-        }
-        WebServices.askPage(pageIndex, { list, _ ->
-            lazyDone.value
-            if (lastItempediaPage == pageIndex) {
-                list.sortBy { it.uuid }
-                itempediaAdapter.startIndex = pageIndex * ITEMS_PER_PAGE + 1
-                itempediaAdapter.currentItems = list
-                itempediaAdapter.notifyDataSetChanged()
-                val rec = findViewById<RecyclerView>(R.id.itempediaElements)!!
-                rec.smoothScrollToPosition(0)
-            }
-        }, {
-            lazyDone.value
-            ServerService.defaultOnError(it)
-        })
-    }
 
     private fun addClickListeners() {
         startButton?.setOnClickListener { FlipperContent.GAME.bind(this) }
@@ -401,18 +385,29 @@ class AllManager : AppCompatActivity() {
             lazyItempediaInit.value
             FlipperContent.ITEMPEDIA.bind(this)
         }
-        back1?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        back2?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        backArrow3?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        backArrow4?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        backArrow5?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        backArrow6?.setOnClickListener { FlipperContent.MENU.bind(this) }
-        addSearchListeners(back3, backArrow1, searchButton1, search1, unlocked)
-        addSearchListeners(back1, backArrow2, searchButton2, search2, combiner)
+
+        for (backArrow in listOf(
+            back1, back2,
+            backArrow1, backArrow2, backArrow3,
+            backArrow4, backArrow5, backArrow6
+        )) {
+            backArrow?.setOnClickListener { FlipperContent.MENU.bind(this) }
+        }
+
+        addSearchListeners(back3, searchButton1, search1, unlocked)
+        addSearchListeners(back1, searchButton2, search2, combiner)
+        ItempediaSearch.setupSearchButton(this)
+
         randomButton?.setOnClickListener { RandomSuggestion.make(this) }
     }
 
     fun loadEverythingFromPreferences() {
+
+        val clock = Clock()
+
+        pref.getInt("0", 0)
+
+        clock.stop("Loading preferences")
 
         askFrequency = AskFrequencyOption[pref]
         backgroundMusicVolume = pref.getFloat("backgroundMusicVolume", 1f)
@@ -423,7 +418,11 @@ class AllManager : AppCompatActivity() {
         WebServices.serverInstance = pref.getInt("serverInstance", 0)
         WebServices.serverName = pref.getString("serverName", "Default")!!
 
-        SettingsInit.init(this)
+        clock.stop("Getting a few prefs")
+
+        SettingsInit.initMainButton(this)
+
+        clock.stop("Settings.init")
 
         saveElement = { edit, element ->
             MusicScheduler.tick()
@@ -451,7 +450,6 @@ class AllManager : AppCompatActivity() {
                 }
             }
             edit.putString(id.toString(), value.toString())
-            println("saved $id/$value")
         }
 
         saveElement2 = { element ->
@@ -475,13 +473,21 @@ class AllManager : AppCompatActivity() {
             edit.apply()
         }
 
+        clock.stop("Callbacks")
+
         readUnlockedElementsLegacy()
 
+        clock.stop("Legacy-Loading")
+
         registerBaseElements(pref)
+
+        clock.stop("Register base elements")
 
         readUnlockedElements()
 
         loadOfflineElements(this, pref)
+
+        clock.stop("Loading offline")
 
         createUniqueIdentifier()
 
@@ -492,7 +498,11 @@ class AllManager : AppCompatActivity() {
 
         updateGroupSizesAndNames()
 
+        clock.stop("Stuff")
+
         askNews()
+
+        clock.stop("News")
 
         val edit2 = pref.edit()
         for ((key, value) in pref.all) {
@@ -527,29 +537,40 @@ class AllManager : AppCompatActivity() {
             }
         }
 
+        clock.stop("Diamond View Stuff")
+
         updateDiamondCount()
+
+        clock.stop("Diamond Count")
 
         CombinationCache.init(pref)
 
+        clock.stop("CombinationCache.init")
+
         SaveLoadLogic.init(this)
 
-        // todo everything is saved, isn't it?
-        // todo then clear the cache :D
-
+        clock.stop("SaveLoadLogic.init")
     }
 
     private fun readUnlockedElementsLegacy() {
         val unlockedIdsString = pref.getString("unlocked", null)
         if (unlockedIdsString != null) {
             unlockedIds.addAll(unlockedIdsString
-                .split(',')
-                .mapNotNull { x -> x.toIntOrNull() })
+                .split(',').mapNotNull { x -> x.toIntOrNull() })
         } else unlockedIds.addAll(listOf(1, 2, 3, 4))
     }
 
     private fun readUnlockedElements() {
+        setTimeout({
+            readUnlockedElements0()
+            runOnUiThread(::updateDiamondCount)
+        }, 0)
+    }
+
+    private fun readUnlockedElements0() {
+        val clock = Clock()
         val reader = SplitReader2()
-        val recipeMemory = HashMap<Element, IntArrayList>()
+        val recipeMemory = HashMap<Element, IntArrayList>(512)
         for ((key, value) in pref.all) {
             val id = key.toIntOrNull()
             if (id != null && value != null) {
@@ -558,14 +579,14 @@ class AllManager : AppCompatActivity() {
                     reader.input = valueStr
                     val name = reader.readString(';', ';', "")
                     val group = reader.readInt(';', ';', -1)
+                    // println("parsing $valueStr for id $id -> '$name', $group")
                     if (group < 0) continue
                     val craftCount = reader.readInt(';', ';', -1)
                     val wasCrafted = reader.readInt(';', ';', 0) > 0
-                    val element = Element.get(name, id, group, craftCount, false)
+                    val element = elementById.getOrPut(id) { Element(name, id, group, craftCount) }
                     if (wasCrafted) {
                         unlockedIds.put(id)
-                        val list = unlockedElements[group]
-                        list.add(element)
+                        unlockedElements[group].add(element)
                     }
                     if (reader.hasRemaining) {
                         val list = IntArrayList()
@@ -598,6 +619,7 @@ class AllManager : AppCompatActivity() {
                 edit.apply()
             }
         }
+        clock.stop("Read Unlocked: Load All, #${unlockedIds.size}")
         for ((element, abs) in recipeMemory) {
             abs.forEachPair { a, b ->
                 val ea = elementById[a]
@@ -607,6 +629,7 @@ class AllManager : AppCompatActivity() {
                 }
             }
         }
+        clock.stop("Read Unlocked: Adding Recipes, #${recipeMemory.size}")
     }
 
     private fun createUniqueIdentifier() {
@@ -633,7 +656,7 @@ class AllManager : AppCompatActivity() {
         val current = getDiamondCount()
         val hasEnough = count < 0 || current >= count
         if (hasEnough) {
-            successSound.play()
+            successSound?.play()
             pref.edit().putInt(diamondSpentKey, pref.getInt(diamondSpentKey, 0) + count).apply()
             updateDiamondCount()
         } else {
@@ -659,13 +682,11 @@ class AllManager : AppCompatActivity() {
 
     private fun addSearchListeners(
         back: View?,
-        backArrow: View?,
         searchButton: View?,
         search: TextView?,
         unlocked: UnlockedRows?
     ) {
         back?.setOnClickListener { flipper?.displayedChild = 0 }
-        backArrow?.setOnClickListener { flipper?.displayedChild = 0 }
         val diamondView = (back?.parent as? View)?.findViewById<View>(R.id.diamonds)
         searchButton?.setOnClickListener {
             if (back?.visibility == VISIBLE) {
@@ -697,15 +718,16 @@ class AllManager : AppCompatActivity() {
     }
 
     fun askNews() {
-        WebServices.askNews(20, {
-            newsView?.news = it
-            newsView?.postInvalidate()
-        }, if (offlineMode) {
-            { /* can be ignored */ }
-        } else ServerService.defaultOnError)
+        if (newsView != null) {
+            WebServices.askNews(20, {
+                newsView?.news = it
+                newsView?.postInvalidate()
+            }, if (offlineMode) {
+                { /* can be ignored */ }
+            } else ServerService.defaultOnError)
+        }
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val flipper = flipper
         if (flipper != null && flipper.displayedChild > 0) {
@@ -728,5 +750,7 @@ class AllManager : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         MusicScheduler.unpause()
+        goFullScreen()
     }
+
 }

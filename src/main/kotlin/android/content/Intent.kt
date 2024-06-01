@@ -1,3 +1,3 @@
 package android.content
 
-class Intent
+typealias Intent = Any

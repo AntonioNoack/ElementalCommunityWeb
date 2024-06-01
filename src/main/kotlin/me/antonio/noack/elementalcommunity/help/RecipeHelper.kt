@@ -17,7 +17,6 @@ import me.antonio.noack.elementalcommunity.io.ElementType
 import me.antonio.noack.elementalcommunity.io.SplitReader
 import me.antonio.noack.elementalcommunity.utils.Compact.compacted
 import me.antonio.noack.webdroid.StringID
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 object RecipeHelper {
@@ -106,7 +105,7 @@ object RecipeHelper {
         }.joinToString("")
     }
 
-    val cache = ConcurrentHashMap<String, ArrayList<Recipe>>()
+    val cache = HashMap<String, ArrayList<Recipe>>()
     val offers = listOf(
         Offer(
             R.string.recipe_lookup,

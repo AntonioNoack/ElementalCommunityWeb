@@ -28,7 +28,7 @@ interface ServerService {
     )
 
     fun askPage(
-        pageIndex: Int,
+        pageIndex: Int, search: String,
         onSuccess: (ArrayList<Element>, Int) -> Unit,
         onError: (Exception) -> Unit = defaultOnError
     )
@@ -62,6 +62,11 @@ interface ServerService {
     fun askRecipes(
         name: String,
         onSuccess: (raw: String) -> Unit, onError: (Exception) -> Unit = defaultOnError
+    )
+
+    fun getRandomRecipe(
+        onSuccess: (raw: String) -> Unit,
+        onError: (Exception) -> Unit = defaultOnError
     )
 
     fun updateGroupSizesAndNames()

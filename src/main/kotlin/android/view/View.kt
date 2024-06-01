@@ -409,7 +409,12 @@ open class View(ctx: Context?, attributeSet: AttributeSet?) {
             width = attributeSet.getSize("layout_width", WRAP_CONTENT)
             height = attributeSet.getSize("layout_height", WRAP_CONTENT)
 
-            gravity = Gravity.parseGravity(attributeSet.getString("gravity", ""))
+            gravity = Gravity.parseGravity(
+                attributeSet.getString(
+                    "gravity",
+                    attributeSet.getString("layout_gravity", "")
+                )
+            )
 
             val margin = attributeSet.getSize("layout_margin", view?.getDefaultMargin() ?: 0)
             leftMargin = attributeSet.getSize("layout_marginLeft", margin)

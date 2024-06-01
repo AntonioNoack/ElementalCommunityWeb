@@ -1,6 +1,5 @@
 package me.antonio.noack.elementalcommunity.itempedia
 
-import R
 import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
@@ -12,14 +11,13 @@ import me.antonio.noack.elementalcommunity.Element
 import me.antonio.noack.elementalcommunity.OneElement
 import me.antonio.noack.elementalcommunity.api.WebServices
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 
 class ItempediaAdapter(private val manager: AllManager) :
     RecyclerView.Adapter<ItempediaAdapter.ViewHolder>() {
 
     class ViewHolder(view: OneElement) : RecyclerView.ViewHolder(view)
 
-    var startIndex = 0
     var currentItems: List<Element> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,11 +27,11 @@ class ItempediaAdapter(private val manager: AllManager) :
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val uuid = position + startIndex
-        val index = currentItems.binarySearch { it.uuid.compareTo(uuid) }
+        // present results
         val view = holder.itemView as OneElement
-        if (index >= 0) {
-            val element = currentItems[index]
+        val element = currentItems.getOrNull(position)
+        if (element != null) {
+            val uuid = element.uuid
             view.element = element
             view.alphaOverride = if (uuid in AllManager.unlockedIds.keys) 255 else HIDDEN_ALPHA
             view.invalidate()
@@ -42,22 +40,18 @@ class ItempediaAdapter(private val manager: AllManager) :
                 val dialog = AlertDialog.Builder(manager)
                     .setView(R.layout.itempedia_item)
                     .show()
-                thread {
-                    WebServices.askStats(uuid, { stats ->
-                        manager.runOnUiThread {
-                            dialog.findViewById<TextView>(R.id.numRecipes)?.text =
-                                stats.numRecipes.toString()
-                            dialog.findViewById<TextView>(R.id.numIngredients)?.text =
-                                stats.numIngredients.toString()
-                            dialog.findViewById<TextView>(R.id.numSuggestedRecipes)?.text =
-                                stats.numSuggestedRecipes.toString()
-                            dialog.findViewById<TextView>(R.id.numSuggestedIngredients)?.text =
-                                stats.numSuggestedIngredients.toString()
-                            dialog.findViewById<TextView>(R.id.craftingCountAsIngredient)?.text =
-                                stats.numCraftedAsIngredient.toString()
-                        }
-                    })
-                }
+                WebServices.askStats(uuid, { stats ->
+                    dialog.findViewById<TextView>(R.id.numRecipes)?.text =
+                        stats.numRecipes.toString()
+                    dialog.findViewById<TextView>(R.id.numIngredients)?.text =
+                        stats.numIngredients.toString()
+                    dialog.findViewById<TextView>(R.id.numSuggestedRecipes)?.text =
+                        stats.numSuggestedRecipes.toString()
+                    dialog.findViewById<TextView>(R.id.numSuggestedIngredients)?.text =
+                        stats.numSuggestedIngredients.toString()
+                    dialog.findViewById<TextView>(R.id.craftingCountAsIngredient)?.text =
+                        stats.numCraftedAsIngredient.toString()
+                })
                 dialog.findViewById<OneElement>(R.id.elementView)?.element = element
                 dialog.findViewById<TextView>(R.id.uuid)?.text = "#$uuid"
                 dialog.findViewById<TextView>(R.id.craftingCount)?.text =
@@ -75,7 +69,7 @@ class ItempediaAdapter(private val manager: AllManager) :
     }
 
     override fun getItemCount(): Int {
-        return ITEMS_PER_PAGE
+        return currentItems.size
     }
 
     companion object {

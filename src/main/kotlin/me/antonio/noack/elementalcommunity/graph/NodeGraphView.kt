@@ -15,6 +15,7 @@ import me.antonio.noack.elementalcommunity.AllManager.Companion.addRecipe
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawElement
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawFavourites
 import me.antonio.noack.elementalcommunity.utils.Maths
+import java.util.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -25,24 +26,24 @@ abstract class NodeGraphView(
     val iterativeTree: Boolean
 ) : View(ctx, attributeSet) {
 
-    var allowLeftFavourites = true
+    private var allowLeftFavourites = true
 
     lateinit var all: AllManager
-    val unlockeds get() = AllManager.unlockedElements
+    private val unlockeds get() = AllManager.unlockedElements
 
-    var hasTree = false
-    var hasTreeReally = false
+    private var hasTree = false
+    private var hasTreeReally = false
 
     // measured border coordinates for prevention of scrolling further away
 
-    var minXf = 0f
-    var maxXf = 0f
-    var minYf = 0f
-    var maxYf = 0f
+    private var minXf = 0f
+    private var maxXf = 0f
+    private var minYf = 0f
+    private var maxYf = 0f
 
-    var ctr = 0
+    private var ctr = 0
 
-    var elementSize = 25f
+    private var elementSize = 25f
 
     abstract fun buildTreeAsync()
 
@@ -51,11 +52,13 @@ abstract class NodeGraphView(
     private fun buildTree() {
         hasTree = true
         val ctr = ++ctr
-        buildTreeAsync()
-        if (ctr == this.ctr) {
-            this.postInvalidate()
-            updateSize()
-            hasTreeReally = true
+        threadOrNot("TreeBuilder") {
+            buildTreeAsync()
+            if (ctr == this.ctr) {
+                this.postInvalidate()
+                updateSize()
+                hasTreeReally = true
+            }
         }
     }
 
@@ -72,7 +75,6 @@ abstract class NodeGraphView(
             minYf = min(minYf, element.py)
             maxYf = max(maxYf, element.py)
         }
-
     }
 
     fun validXY(event: MotionEvent): Triple<AreaType, Int, Int> {
@@ -293,7 +295,7 @@ abstract class NodeGraphView(
                                 // set it here
                                 AllManager.favourites[internalX] = dragged
                                 AllManager.saveFavourites()
-                                AllManager.clickSound.play()
+                                AllManager.clickSound?.play()
                                 invalidate()
                                 null
                             }
@@ -336,17 +338,15 @@ abstract class NodeGraphView(
 
     // canvas: Canvas, x0: Float, y0: Float, delta: Float, widthPerNode: Float, margin: Boolean, element: Element, bgPaint: Paint, textPaint: Paint
 
-    var lastTime = java.util.System.nanoTime()
+    private var lastTime = System.nanoTime()
 
-    inline fun forAllElements(run: (Element) -> Unit) {
+    fun forAllElements(run: (Element) -> Unit) {
         if (unlockeds.all { it.isEmpty() }) {
             AllManager.registerBaseElements(null)
         }
         for (list in unlockeds) {
-            if (null != list) {
-                for (element in list) {
-                    run(element)
-                }
+            for (element in list) {
+                run(element)
             }
         }
     }
@@ -366,7 +366,7 @@ abstract class NodeGraphView(
 
         checkScroll()
 
-        val thisTime = java.util.System.nanoTime()
+        val thisTime = System.nanoTime()
         val deltaTime = clamp((thisTime - lastTime).toInt(), 0, 250000000) * 1e-9f
         lastTime = thisTime
 
@@ -381,7 +381,7 @@ abstract class NodeGraphView(
         linePaint.color = 0x30000000
         linePaint.strokeWidth = max(2f, min(width, height) * 0.005f)
 
-        // val line0 = java.util.System.nanoTime()
+        // val line0 = System.nanoTime()
         /*forAllElements { element ->
             if (element.hasTreeOutput) {
                 drawElementOutput(canvas, centerX, centerY, element)
@@ -457,7 +457,7 @@ abstract class NodeGraphView(
         }
 
         val scrollDest = scrollDest
-        if (scrollDest != null) {
+        if (scrollDest != null && (scrollDest.px != 0f || scrollDest.py != 0f)) {
 
             val dt = clamp(3f * deltaTime, 0f, 1f)
 
@@ -472,13 +472,11 @@ abstract class NodeGraphView(
                     scrollX = 0f
                     scrollY = 0f
                 }
-
                 sqrt(sq(scrollX - scrollDestX, scrollY - scrollDestY)) < 0.05f -> {
                     scrollX = scrollDestX
                     scrollY = scrollDestY
                     this.scrollDest = null
                 }
-
                 else -> invalidate()
             }
 
@@ -587,7 +585,6 @@ abstract class NodeGraphView(
     }
 
     private fun unlockElement(sa: Element, sb: Element, element: Element) {
-
         //  add to achieved :D
         val newOne = add(sa, sb, element)
         activeElement = element
@@ -596,7 +593,13 @@ abstract class NodeGraphView(
         scrollDest = element
 
         invalidate()
-        (if (newOne) AllManager.successSound else AllManager.okSound).play()
-
+        (if (newOne) AllManager.successSound else AllManager.okSound)?.play()
     }
+
+    companion object {
+        fun threadOrNot(name: String, runnable: () -> Unit) {
+            runnable()
+        }
+    }
+
 }

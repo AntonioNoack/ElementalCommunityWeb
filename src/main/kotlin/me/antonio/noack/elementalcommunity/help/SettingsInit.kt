@@ -12,19 +12,20 @@ import me.antonio.noack.elementalcommunity.MusicScheduler
 import me.antonio.noack.elementalcommunity.OfflineSuggestions
 import me.antonio.noack.elementalcommunity.api.ServerService.Companion.defaultOnError
 import me.antonio.noack.elementalcommunity.api.WebServices
-import me.antonio.noack.elementalcommunity.utils.Maths
 import java.math.BigInteger
+import kotlin.random.Random
 
 object SettingsInit {
 
-    fun volumeTitle(): String {
+    private fun volumeTitle(): String {
         return if (AllManager.backgroundMusicVolume == 0f) "Off"
         else "${(AllManager.backgroundMusicVolume * 100).toInt()}%"
     }
 
-    fun init(all: AllManager) {
-        all.apply {
+    private var hasInitializedSettings = false
 
+    fun initMainButton(all: AllManager) {
+        all.apply {
             settingButton?.setOnLongClickListener {
                 AllManager.toast("Click to open the settings.", true)
                 true
@@ -40,8 +41,17 @@ object SettingsInit {
                 volumeSlider?.progress = (AllManager.backgroundMusicVolume * 100).toInt()
                 volumeTitle?.text = resources.getString(R.string.background_music_volume)
                     .replace("#percent", volumeTitle())
+                if (!hasInitializedSettings) {
+                    hasInitializedSettings = true
+                    init(this)
+                }
                 FlipperContent.SETTINGS.bind(all)
             }
+        }
+    }
+
+    private fun init(all: AllManager) {
+        all.apply {
 
             val treeView = treeView
             treeView?.apply {
@@ -255,13 +265,15 @@ object SettingsInit {
 
             resetEverythingButton?.setOnLongClickListener {
                 // generate 100 diamonds over 10 long clicks
-                spendDiamonds(if (Maths.random() < 0.1) -250 else 15)
+                spendDiamonds(if (Random.nextDouble() < 0.1) -250 else 15)
                 true
             }
+
+
         }
     }
 
-    fun AllManager.resetEverything() {
+    private fun AllManager.resetEverything() {
         pref.edit().clear().putLong("customUUID", AllManager.customUUID).apply()
         AllManager.unlockedIds.clear()
         AllManager.unlockedIds.addAll(listOf(1, 2, 3, 4))
@@ -281,7 +293,7 @@ object SettingsInit {
         AllManager.invalidate()
     }
 
-    fun AllManager.switchServer() {
+    private fun AllManager.switchServer() {
 
         val dialog: Dialog = AlertDialog.Builder(this)
             .setView(R.layout.switch_server)
@@ -385,7 +397,7 @@ object SettingsInit {
         }
     }
 
-    fun checkServerName(name: String): Unit? {
+    private fun checkServerName(name: String): Unit? {
         for (char in name) {
             if (when (char) {
                     in 'A'..'Z', in 'a'..'z', in '0'..'9' -> false
@@ -399,7 +411,7 @@ object SettingsInit {
         return Unit
     }
 
-    fun AllManager.createOwnServer() {
+    private fun AllManager.createOwnServer() {
         val dialog: Dialog = AlertDialog.Builder(this)
             .setView(R.layout.switch_server_create)
             .setCancelable(true)
@@ -412,7 +424,7 @@ object SettingsInit {
                 val pass = dialog.findViewById<TextView>(R.id.password)!!.text.trim().toString()
                 val passInt = if (pass.isEmpty()) 0L else hashPassword(pass)
                 WebServices.createServerInstance(this, name, passInt, { realName, id ->
-                    if (realName == null || realName.isEmpty()) {
+                    if (realName.isNullOrEmpty()) {
                         when (id) {
                             -1 -> AllManager.toast("This name is already used!", true)
                             else -> AllManager.toast("Something went wrong!", true)
@@ -448,7 +460,7 @@ object SettingsInit {
     }
 
     /**
-     * not that secure, however it's meant for shared password only anyway;
+     * not that secure, however it's meant for shared password only anyways;
      * because the server side is not secure for handling server instances, either
      * */
     private fun hashPassword(pass: String): Long {
@@ -458,4 +470,5 @@ object SettingsInit {
         val pow = big.modPow(prime, BigInteger("2").pow(64).minus(BigInteger("1")))
         return pow.toLong().toLong() and 0x7fffffffffffffffL
     }
+
 }

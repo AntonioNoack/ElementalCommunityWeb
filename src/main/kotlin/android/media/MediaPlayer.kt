@@ -9,13 +9,12 @@ class MediaPlayer(val src: String) {
     var isLoaded = false
 
     init {
-        instance.onerror = { _, _, _, _, _ ->
+        instance.addEventListener("error", {
             println("Media $src error")
-        }
-        instance.onload = {
+        })
+        instance.addEventListener("canplaythrough", {
             isLoaded = true
-            0
-        }
+        })
         instance.src = src
     }
 

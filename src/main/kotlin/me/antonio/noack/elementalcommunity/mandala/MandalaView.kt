@@ -14,19 +14,18 @@ import me.antonio.noack.elementalcommunity.*
 import me.antonio.noack.elementalcommunity.AllManager.Companion.addRecipe
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawElement
 import me.antonio.noack.elementalcommunity.GroupsEtc.drawFavourites
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
+import java.util.*
+import kotlin.math.*
 
 @SuppressLint("ClickableViewAccessibility")
 class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attributeSet) {
 
-    var allowLeftFavourites = true
+    private var allowLeftFavourites = true
 
     lateinit var all: AllManager
-    var unlockeds = AllManager.unlockedElements
+    private val unlocked get() = AllManager.unlockedElements
 
-    lateinit var tree: Mandala
+    private lateinit var tree: Mandala
     var hasTree = false
     var isInvalidated = true
 
@@ -57,8 +56,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
                 )
                 if (event.x < favSize) {
                     val maybeX = event.y / favSize
-                    if (searchIfNull && AllManager.favourites.getOrNull(maybeX.toInt()) == null) {
-                    } else {
+                    if (!(searchIfNull && AllManager.favourites.getOrNull(maybeX.toInt()) == null)) {
                         isSpecial = true
                         intX = maybeX
                     }
@@ -71,8 +69,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
                 )
                 if (event.y > height - favSize) {
                     val maybeX = event.x / favSize
-                    if (searchIfNull && AllManager.favourites.getOrNull(maybeX.toInt()) == null) {
-                    } else {
+                    if (!(searchIfNull && AllManager.favourites.getOrNull(maybeX.toInt()) == null)) {
                         isSpecial = true
                         intX = maybeX
                     }
@@ -85,11 +82,11 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
         return Triple(if (isSpecial) AreaType.FAVOURITES else AreaType.ELEMENTS, intX, intY)
     }
 
-    fun getDistanceSq(loc: MovingLocation, x: Float, y: Float): Float {
+    private fun getDistanceSq(loc: MovingLocation, x: Float, y: Float): Float {
         return sq(loc.targetX - x, loc.targetY - y)
     }
 
-    fun getElementAt(x: Float, y: Float): Element? {
+    fun getElementAt(x: Float, y: Float): Element {
         var minElement = tree.element
         var minDistance = sq(x, y)
         tree.toThisElement.forEach { r ->
@@ -124,7 +121,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
         return minElement
     }
 
-    fun getScale(): Pair<Float, Float> {
+    private fun getScale(): Pair<Float, Float> {
         val min = min(measuredWidth, measuredHeight)
         val sc = if (min > widthPerNode) {
             // w/n or w/n*0.5 is seldom important
@@ -143,7 +140,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
 
     init {
 
-        val scrollListener = GestureDetector(object : GestureDetector.OnGestureListener {
+        val scrollListener = GestureDetector(context, object : GestureDetector.OnGestureListener {
             override fun onShowPress(e: MotionEvent) {}
             override fun onDown(event: MotionEvent): Boolean {
 
@@ -224,11 +221,10 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
                                 // set it here
                                 AllManager.favourites[internalX.toInt()] = first
                                 AllManager.saveFavourites()
-                                AllManager.clickSound.play()
+                                AllManager.clickSound?.play()
                                 invalidate()
                                 null
                             }
-
                             AreaType.IGNORE -> null
                         }
                         if (second != null) {
@@ -269,7 +265,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
 
     // canvas: Canvas, x0: Float, y0: Float, delta: Float, widthPerNode: Float, margin: Boolean, element: Element, bgPaint: Paint, textPaint: Paint
 
-    var lastTime = java.util.System.nanoTime()
+    var lastTime = System.nanoTime()
     var time = 0f
 
     fun switchTo(element: Element) {
@@ -290,7 +286,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
 
         GroupsEtc.tick()
 
-        val thisTime = java.util.System.nanoTime()
+        val thisTime = System.nanoTime()
         val deltaTime = clamp((thisTime - lastTime).toInt(), 0, 250000000) * 1e-9f
         lastTime = thisTime
 
@@ -313,7 +309,7 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
 
         val (scaleX, scaleY) = getScale()
 
-        // val line0 = java.util.System.nanoTime()
+        // val line0 = System.nanoTime()
         tree.draw(time, { element, x, y, alpha, sizeFactor ->
             val size = sizeFactor * widthPerNode
             if (alpha > 0.01f) {
@@ -381,24 +377,20 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
 
     private fun sq(x: Float, y: Float) = x * x + y * y
 
-    var activeElement: Element? = null
-    var activeness = 0f
+    private var activeElement: Element? = null
+    private var activeness = 0f
 
     fun add(sa: Element, sb: Element, element: Element): Boolean {
         addRecipe(sa, sb, element, all)
-        val unlocked = unlockeds[element.group]
-        return if (!unlocked.contains(element) && element.uuid > -1) {
-            unlocked.add(element)
-            // unlocked.sortBy { it.uuid }
-            // invalidateSearch()
+        val unlocked = unlocked[element.group]
+        return if (element.uuid > -1 && unlocked.add(element)) {
             postInvalidate()
             true
         } else false
     }
 
-    fun unlockElement(componentA: Element, componentB: Element, result: Element) {
-
-        //  add to achieved :D
+    private fun unlockElement(componentA: Element, componentB: Element, result: Element) {
+        // add to achieved :D
         val newOne = add(componentA, componentB, result)
         activeElement = result
         activeness = 1f
@@ -406,8 +398,6 @@ class MandalaView(ctx: Context, attributeSet: AttributeSet?) : View(ctx, attribu
         switchTo(result)
 
         invalidate()
-        (if (newOne) AllManager.successSound else AllManager.okSound).play()
+        (if (newOne) AllManager.successSound else AllManager.okSound)?.play()
     }
-
-
 }

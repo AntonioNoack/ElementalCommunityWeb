@@ -13,6 +13,7 @@ import me.antonio.noack.elementalcommunity.io.SplitReader
 import me.antonio.noack.webdroid.Captcha
 import me.antonio.noack.webdroid.HTTP
 import java.net.URLEncoder
+import java.util.System.nanoTime
 
 open class WebService(private val serverURL: String) : ServerService {
 
@@ -132,6 +133,9 @@ open class WebService(private val serverURL: String) : ServerService {
         onError: (Exception) -> Unit
     ) {
 
+        println("asking for $a + $b = ?")
+        println("offline? ${AllManager.offlineMode}")
+
         if (AllManager.offlineMode) {
             CombinationCache.askInEmergency(all, a, b, onSuccess)
             return
@@ -144,7 +148,7 @@ open class WebService(private val serverURL: String) : ServerService {
             return
         }
 
-        val reactionStart = java.util.System.nanoTime()
+        val reactionStart = nanoTime()
         val url = "${getURL()}?a=${a.uuid}&b=${b.uuid}" +
                 "&$webVersionName=$webVersion" +
                 "&sid=$serverInstance"
@@ -152,7 +156,7 @@ open class WebService(private val serverURL: String) : ServerService {
         HTTP.request(url, { text ->
 
             // register ourselves for cache updates instead of real time ones, if the connection is slow
-            val reactionEnd = java.util.System.nanoTime()
+            val reactionEnd = nanoTime()
             lastReactionTime = reactionEnd - reactionStart
             lastReactionCtr = reactionResetCounter
 
@@ -217,16 +221,7 @@ open class WebService(private val serverURL: String) : ServerService {
                         val result = data[7]
                         val resultGroup = data[8].toIntOrNull() ?: continue
                         val weight = data[9].toIntOrNull() ?: continue
-                        list.add(
-                            News(
-                                dt,
-                                a,
-                                b,
-                                result,
-                                resultGroup,
-                                weight
-                            )
-                        )
+                        list.add(News(dt, a, b, result, resultGroup, weight))
                     }
                 }
                 onSuccess(list)
@@ -249,12 +244,12 @@ open class WebService(private val serverURL: String) : ServerService {
     }
 
     override fun askPage(
-        pageIndex: Int,
+        pageIndex: Int, search: String,
         onSuccess: (ArrayList<Element>, Int) -> Unit,
         onError: (Exception) -> Unit
     ) {
         HTTP.request(
-            "${getURL()}?l4=$pageIndex" +
+            "${getURL()}?l4=$pageIndex&search=${URLEncoder.encode(search, "UTF-8")}" +
                     "&$webVersionName=$webVersion", { text ->
                 if (pageIndex < 0) {
                     val maxUUID = text.toIntOrNull() ?: 0
@@ -422,13 +417,11 @@ open class WebService(private val serverURL: String) : ServerService {
         onSuccess: (raw: String) -> Unit,
         onError: (Exception) -> Unit
     ) {
-
         HTTP.request(
             "${getURL()}?qr=$name" +
                     "&$webVersionName=$webVersion" +
                     "&sid=$serverInstance", onSuccess, onError
         )
-
     }
 
     override fun askAllRecipesOfGroup(
@@ -436,18 +429,15 @@ open class WebService(private val serverURL: String) : ServerService {
         onSuccess: (raw: String) -> Unit,
         onError: (Exception) -> Unit
     ) {
-
         // query group recipes
         HTTP.request(
             "${getURL()}?qgr=$group" +
                     "&$webVersionName=$webVersion" +
                     "&sid=$serverInstance", onSuccess, onError
         )
-
     }
 
     override fun updateGroupSizesAndNames() {
-
         HTTP.request("${getURL()}?l3" +
                 "&$webVersionName=$webVersion" +
                 "&sid=$serverInstance", {
@@ -478,7 +468,16 @@ open class WebService(private val serverURL: String) : ServerService {
             AllManager.invalidate()
 
         }, {})
+    }
 
+    override fun getRandomRecipe(
+        onSuccess: (raw: String) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        HTTP.request("${getURL()}?rnd" +
+                "&$webVersionName=$webVersion" +
+                "&sid=$serverInstance", onSuccess, onError
+        )
     }
 
     override fun requestServerInstance(
